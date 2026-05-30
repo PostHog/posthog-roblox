@@ -9,7 +9,7 @@ and track errors from your Roblox experiences.
 - **Batteries included.** Events, identity, groups, feature flags, error tracking, and lifecycle
   autocapture.
 
-> Session replay is intentionally not included: it is screenshot based and not feasible on Roblox.
+> **New here?** The [**Getting started guide**](docs/getting-started.md) takes you from zero to your first event in about 10 minutes.
 
 ## Requirements
 
