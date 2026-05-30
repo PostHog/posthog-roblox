@@ -1,0 +1,39 @@
+name: Release
+
+# Tag a commit `vX.Y.Z` (matching the version in wally.toml) to publish.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Run tests + coverage gate
+        run: lune run tests/runTests.luau
+
+      - name: Build model
+        run: rojo build default.project.json --output posthog-roblox.rbxm
+
+      # Requires a WALLY_TOKEN repository secret (a wally.run API token from
+      # `wally login` run locally, or a GitHub token for the registry).
+      - name: Publish to Wally
+        env:
+          WALLY_TOKEN: ${{ secrets.WALLY_TOKEN }}
+        run: |
+          mkdir -p ~/.wally
+          printf '[tokens]\n"https://api.wally.run/" = "%s"\n' "$WALLY_TOKEN" > ~/.wally/auth.toml
+          wally publish
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: posthog-roblox.rbxm
+          generate_release_notes: true

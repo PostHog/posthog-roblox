@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Tool versions (rojo, wally, selene, stylua, lune) are pinned in rokit.toml and
+# installed by setup-rokit, so CI matches local development exactly.
+
+jobs:
+  style:
+    name: Style (stylua + selene)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - name: Check formatting
+        run: stylua --check src tests ExampleProject
+      - name: Lint
+        run: selene src tests
+
+  test:
+    name: Tests + coverage gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - name: Run unit tests (fails if coverage drops below 100%)
+        run: lune run tests/runTests.luau
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: CompeyDev/setup-rokit@v0.1.2
+      - name: Build model
+        run: rojo build default.project.json --output posthog-roblox.rbxm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: posthog-roblox
+          path: posthog-roblox.rbxm
+          if-no-files-found: error
