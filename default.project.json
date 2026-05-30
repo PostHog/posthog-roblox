@@ -1,0 +1,6 @@
+{
+  "name": "PostHog",
+  "tree": {
+    "$path": "src"
+  }
+}

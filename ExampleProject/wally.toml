@@ -1,0 +1,14 @@
+# This manifest shows how a real game depends on the SDK from the Wally registry.
+# The bundled default.project.json instead maps "../src" directly so the example
+# runs without a `wally install` step.
+
+[package]
+name = "posthog/posthog-roblox-example"
+description = "Example game using the PostHog Roblox SDK"
+version = "0.1.0"
+license = "MIT"
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+
+[dependencies]
+PostHog = "posthog/posthog-roblox@0.1.0"

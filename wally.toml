@@ -1,0 +1,11 @@
+[package]
+name = "posthog/posthog-roblox"
+description = "PostHog analytics SDK for Roblox. Capture events, identify players, evaluate feature flags, and track errors."
+version = "0.1.0"
+license = "MIT"
+authors = ["PostHog <engineering@posthog.com>"]
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+exclude = ["ExampleProject", "tests", "*.spec.luau"]
+
+[dependencies]

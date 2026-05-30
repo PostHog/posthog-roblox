@@ -1,0 +1,24 @@
+# Wally packages
+/Packages/
+/ServerPackages/
+/DevPackages/
+/ExampleProject/Packages/
+
+# Build artifacts
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+*.rbxl.lock
+*.rbxlx.lock
+
+# Rokit / toolchain
+/.rokit/
+
+# Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Sourcemap
+sourcemap.json

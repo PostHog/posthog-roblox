@@ -1,0 +1,27 @@
+{
+  "name": "PostHogExample",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "PostHog": {
+        "$path": "../src"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "PostHogDemo": {
+        "$path": "src/server/PostHogDemo.server.luau"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "PostHogDemo": {
+          "$path": "src/client/PostHogDemo.client.luau"
+        }
+      }
+    }
+  }
+}

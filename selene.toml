@@ -1,0 +1,5 @@
+std = "roblox"
+
+[rules]
+# The public API intentionally exposes methods that ignore self in some stubs.
+# Keep defaults otherwise; selene's roblox std knows the Roblox globals.
