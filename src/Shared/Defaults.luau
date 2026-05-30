@@ -1,7 +1,8 @@
---!strict
+--!nonstrict
 -- Default configuration values, shared constants, and config resolution.
-
-local Types = require(script.Parent.Types)
+--
+-- This module has no internal requires so it can be unit-tested headlessly under
+-- lune. The public config shape lives in Shared/Types (PostHog.Config).
 
 local Defaults = {}
 
@@ -16,8 +17,8 @@ Defaults.SEND_DEFAULT_PERSON_PROPERTIES_FOR_FLAGS = true
 Defaults.CAPTURE_LIFECYCLE_EVENTS = true
 Defaults.CAPTURE_ERRORS = true
 Defaults.ERROR_DEBOUNCE_SECONDS = 1
-Defaults.PERSON_PROFILES = "identified_only" :: Types.PersonProfiles
-Defaults.LOG_LEVEL = "warn" :: Types.LogLevel
+Defaults.PERSON_PROFILES = "identified_only"
+Defaults.LOG_LEVEL = "warn"
 Defaults.SERVER_DISTINCT_ID = "server"
 Defaults.ENABLE_CLIENT_RELAY = true
 Defaults.CLIENT_RATE_LIMIT_PER_SECOND = 20
@@ -53,14 +54,14 @@ end
 
 -- Fills a user config with defaults and validates it. Returns the resolved config.
 -- Raises if the API key is missing or a numeric option is out of range.
-function Defaults.resolve(config: Types.Config): Types.Config
+function Defaults.resolve(config)
     assert(type(config) == "table", "PostHog config must be a table")
     assert(
         type(config.apiKey) == "string" and config.apiKey ~= "",
         "PostHog config.apiKey is required"
     )
 
-    local resolved: Types.Config = {
+    local resolved = {
         apiKey = config.apiKey,
         host = coalesce(config.host, Defaults.HOST),
         flushAt = coalesce(config.flushAt, Defaults.FLUSH_AT),
