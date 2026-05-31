@@ -1,5 +1,5 @@
 [package]
-name = "posthog/posthog-roblox"
+name = "charlesvien/posthog-roblox"
 description = "PostHog analytics SDK for Roblox. Capture events, identify players, evaluate feature flags, and track errors."
 version = "0.1.0"
 license = "MIT"
