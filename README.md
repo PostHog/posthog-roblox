@@ -50,17 +50,6 @@ Download the latest `posthog-roblox.rbxm` from the
 `ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
 named `PostHog`.
 
-### roblox-ts (npm)
-
-Writing your game in TypeScript? Install the typed package:
-
-```sh
-npm install @rbxts/posthog
-```
-
-It bundles this SDK with TypeScript declarations, so there is no separate runtime. See
-[Using the SDK with roblox-ts](docs/roblox-ts.md) for server and client usage.
-
 ### Enable HTTP requests
 
 The SDK sends events over HTTP, which only the Roblox server can do, and only once you allow it:
@@ -110,7 +99,6 @@ identity and feature flags.
 | [Sessions and teleports](docs/sessions.md) | How sessions work and how to continue them across teleports. |
 | [Configuration](docs/configuration.md) | Every `Init` option explained. |
 | [API reference](docs/api-reference.md) | The complete server and client API. |
-| [roblox-ts](docs/roblox-ts.md) | Using the SDK from TypeScript with `@rbxts/posthog`. |
 
 ## Architecture
 
