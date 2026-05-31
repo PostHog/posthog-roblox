@@ -19,11 +19,58 @@ evaluate feature flags, and track errors from your Roblox experiences.
 - HTTP requests enabled for your experience (Game Settings → Security → **Allow HTTP Requests**).
 - A PostHog project API key (starts with `phc_`).
 
-## Quick look
+## Installation
 
-The [getting started guide](docs/getting-started.md) is the place to begin: it covers installation
-(Wally or a model file), enabling HTTP, and verifying your first events in PostHog. Once
-`ReplicatedStorage > PostHog` is in place, an integration looks like this.
+Both server and client code require the SDK at `ReplicatedStorage > PostHog`. Pick the path that
+matches your workflow — either one gets you there.
+
+### Wally (Rojo projects)
+
+Add the dependency to your `wally.toml`:
+
+```toml
+[dependencies]
+PostHog = "posthog/posthog-roblox@0.1.0"
+```
+
+Run `wally install`, then map the package into `ReplicatedStorage` in your Rojo project file (for
+example `default.project.json`) so it replicates to clients:
+
+```json
+"ReplicatedStorage": {
+  "$className": "ReplicatedStorage",
+  "PostHog": { "$path": "Packages/PostHog" }
+}
+```
+
+### Model file (no tooling)
+
+Download the latest `posthog-roblox.rbxm` from the
+[releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
+`ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
+named `PostHog`.
+
+### roblox-ts (npm)
+
+Writing your game in TypeScript? Install the typed package:
+
+```sh
+npm install @rbxts/posthog
+```
+
+It bundles this SDK with TypeScript declarations, so there is no separate runtime. See
+[Using the SDK with roblox-ts](docs/roblox-ts.md) for server and client usage.
+
+### Enable HTTP requests
+
+The SDK sends events over HTTP, which only the Roblox server can do, and only once you allow it:
+**Game Settings → Security → Allow HTTP Requests → On**.
+
+## Quick start
+
+With `ReplicatedStorage > PostHog` in place and HTTP enabled, initialize on the server and start
+capturing. Lifecycle events like `server_started` and `player_joined` are captured automatically, so
+you have data the moment you press **Play**.
 
 Server (a `Script` in `ServerScriptService`):
 
@@ -46,6 +93,10 @@ local PostHog = require(game.ReplicatedStorage:WaitForChild("PostHog"))
 PostHog:Capture("button_clicked", { button = "play" }) -- relayed to the server
 ```
 
+New to the SDK? The **[getting started guide](docs/getting-started.md)** walks through the whole
+flow end to end: installing, initializing, verifying your first events in PostHog, and adding
+identity and feature flags.
+
 ## Documentation
 
 | Guide | What it covers |
@@ -59,6 +110,7 @@ PostHog:Capture("button_clicked", { button = "play" }) -- relayed to the server
 | [Sessions and teleports](docs/sessions.md) | How sessions work and how to continue them across teleports. |
 | [Configuration](docs/configuration.md) | Every `Init` option explained. |
 | [API reference](docs/api-reference.md) | The complete server and client API. |
+| [roblox-ts](docs/roblox-ts.md) | Using the SDK from TypeScript with `@rbxts/posthog`. |
 
 ## Architecture
 

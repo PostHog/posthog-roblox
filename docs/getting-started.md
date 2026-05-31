@@ -44,6 +44,13 @@ Download the latest `posthog-roblox.rbxm` from the
 `ReplicatedStorage` → **Insert from File** and select it. Make sure the inserted instance is named
 `PostHog`.
 
+### With roblox-ts
+
+Writing your game in TypeScript? Install
+[`@rbxts/posthog`](https://www.npmjs.com/package/@rbxts/posthog) with `npm install @rbxts/posthog`
+and follow [Using the SDK with roblox-ts](roblox-ts.md). The rest of this guide uses Luau, but every
+call maps directly to the typed API.
+
 ## 2. Enable HTTP requests
 
 PostHog sends events over HTTP, which only the Roblox **server** can do, and only when you allow
