@@ -1,7 +1,8 @@
 --!nonstrict
 -- Player lifecycle autocapture. Creates per-player state and session on join
--- (continuing a session across teleports), emits player_joined / player_left, and
--- tears down state on leave.
+-- (continuing a session across teleports), emits player_joined / player_left /
+-- player_idle, and tears down state on leave. Server-scoped server_started /
+-- server_shutdown events are emitted by the server entry point (init.luau).
 
 local Players = game:GetService("Players")
 local LocalizationService = game:GetService("LocalizationService")
@@ -28,6 +29,7 @@ function Autocapture.new(opts)
         _capture = opts.capture,
         _onPlayerReady = opts.onPlayerReady,
         _connections = {},
+        _idleConnections = {}, -- [Player]: RBXScriptConnection
     }, Autocapture)
 end
 
@@ -96,10 +98,13 @@ function Autocapture:_handleAdded(player: Player)
         return
     end
 
+    self:_connectIdle(player)
     state.countryCode = self:_lookupCountry(player)
 
     self._capture(state, Defaults.EVENTS.PLAYER_JOINED, {
         is_teleport = isTeleport,
+        -- Concurrent players including the one who just joined.
+        player_count = #Players:GetPlayers(),
         account_age_days = player.AccountAge,
         membership_type = player.MembershipType.Name,
         country_code = state.countryCode,
@@ -107,14 +112,44 @@ function Autocapture:_handleAdded(player: Player)
     })
 end
 
+-- Emits player_idle when Roblox reports a player has gone inactive. Idled can fire
+-- repeatedly while a player stays idle, giving a recurring engagement signal.
+function Autocapture:_connectIdle(player: Player)
+    if self._idleConnections[player] then
+        return
+    end
+    self._idleConnections[player] = player.Idled:Connect(function(idleSeconds)
+        local state = self._registry:get(tostring(player.UserId))
+        if state then
+            self._capture(state, Defaults.EVENTS.PLAYER_IDLE, {
+                idle_seconds = math.floor(idleSeconds),
+            })
+        end
+    end)
+end
+
+function Autocapture:_disconnectIdle(player: Player)
+    local connection = self._idleConnections[player]
+    if connection then
+        connection:Disconnect()
+        self._idleConnections[player] = nil
+    end
+end
+
 function Autocapture:_handleRemoving(player: Player)
     local distinctId = tostring(player.UserId)
     local state = self._registry:get(distinctId)
+
+    self:_disconnectIdle(player)
 
     if self._config.captureLifecycleEvents and state and state.session then
         local duration = math.max(0, math.floor(self._now() - state.session.startTime))
         self._capture(state, Defaults.EVENTS.PLAYER_LEFT, {
             session_duration_seconds = duration,
+            -- The leaving player is still listed during PlayerRemoving.
+            player_count = math.max(0, #Players:GetPlayers() - 1),
+            platform = state.platform,
+            country_code = state.countryCode,
         })
     end
 
@@ -126,6 +161,11 @@ function Autocapture:stop()
         connection:Disconnect()
     end
     table.clear(self._connections)
+
+    for _, connection in self._idleConnections do
+        connection:Disconnect()
+    end
+    table.clear(self._idleConnections)
 end
 
 return Autocapture

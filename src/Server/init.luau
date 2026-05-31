@@ -13,6 +13,7 @@
 --   nil             -> the server pseudo-subject (config.serverDistinctId)
 
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
 local Defaults = require(script.Parent.Shared.Defaults)
 local Logger = require(script.Parent.Shared.Logger)
@@ -210,6 +211,15 @@ local function onBindToClose()
         return
     end
 
+    -- A final server-lifecycle event so dashboards can track server uptime and churn.
+    if S.started and S.config.captureLifecycleEvents and S.serverState then
+        local startTime = S.serverState.session and S.serverState.session.startTime or os.time()
+        captureWithState(S.serverState, Defaults.EVENTS.SERVER_SHUTDOWN, {
+            player_count = #Players:GetPlayers(),
+            uptime_seconds = math.max(0, os.time() - startTime),
+        }, { serverScoped = true })
+    end
+
     -- Studio fires BindToClose instantly with no real shutdown window.
     local budget = if RunService:IsStudio() then 2 else Defaults.SHUTDOWN_FLUSH_BUDGET_SECONDS
     local deadline = os.clock() + budget
@@ -342,6 +352,15 @@ function PostHog:Init(userConfig: Types.Config)
             end,
         })
         S.relay:start()
+    end
+
+    if config.captureLifecycleEvents then
+        captureWithState(S.serverState, Defaults.EVENTS.SERVER_STARTED, {
+            player_count = #Players:GetPlayers(),
+            max_players = Players.MaxPlayers,
+            is_private_server = game.PrivateServerId ~= "",
+            is_reserved_server = game.PrivateServerId ~= "" and game.PrivateServerOwnerId == 0,
+        }, { serverScoped = true })
     end
 
     startFlushLoop()

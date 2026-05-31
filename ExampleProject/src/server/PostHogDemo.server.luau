@@ -15,9 +15,11 @@ PostHog:Init({
 -- A super property attached to every event from every player on this server.
 PostHog:Register("game_mode", "demo")
 
--- A server-scoped event (nil subject): not tied to any player.
-PostHog:Capture(nil, "server_started", {
-    max_players = Players.MaxPlayers,
+-- server_started / server_shutdown and player_joined / player_left are captured
+-- automatically. This is a custom server-scoped event (nil subject), not tied to a
+-- player, for something specific to your game.
+PostHog:Capture(nil, "daily_reward_reset", {
+    reward_multiplier = 2,
 })
 
 Players.PlayerAdded:Connect(function(player)
