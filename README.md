@@ -78,24 +78,10 @@ and always attributed to the firing player. See
 
 ## Development
 
-This repo uses [Rokit](https://github.com/rojo-rbx/rokit) to manage tooling. After
-`rokit install`:
-
-```sh
-# Run the unit test suite (pure-logic modules) with a 100% function-coverage gate.
-lune run tests/runTests.luau
-
-# Lint and format.
-selene src tests
-stylua src tests ExampleProject
-
-# Serve to Roblox Studio.
-rojo serve
-```
-
-The [`ExampleProject`](ExampleProject) directory is a runnable demo that maps the SDK from `../src`.
-Open it with `rojo serve`, connect from Studio, set your API key in `PostHogDemo.server.luau`, and
-press Play to see autocaptured and demo events appear in your PostHog project.
+This repo uses [Rokit](https://github.com/rojo-rbx/rokit) to manage tooling. After `rokit install`,
+run the test suite with `lune run tests/runTests.luau`. See **[DEVELOPMENT.md](DEVELOPMENT.md)** for
+the full guide: toolchain, tests and the coverage gate, linting and formatting, building the model
+file, and running the example in Roblox Studio.
 
 Releases are automated on tag push; see [RELEASING.md](RELEASING.md).
 

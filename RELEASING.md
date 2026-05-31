@@ -12,8 +12,7 @@ running `wally login` locally and copying the token from `~/.wally/auth.toml`.
 
 1. Bump `version` in [`wally.toml`](wally.toml) and `SdkVersion` in
    [`src/Shared/Version.luau`](src/Shared/Version.luau) to the same value.
-2. Add a section to [`CHANGELOG.md`](CHANGELOG.md).
-3. Commit, then tag with the matching version and push the tag:
+2. Commit, then tag with the matching version and push the tag:
 
    ```sh
    git tag v0.1.0
