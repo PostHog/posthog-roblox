@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# The GITHUB_TOKEN only needs to read the repo (checkout + Rokit tool downloads).
+permissions:
+  contents: read
+
 # Tool versions (rojo, wally, selene, stylua, lune) are pinned in rokit.toml and
 # installed by setup-rokit, so CI matches local development exactly.
 
@@ -13,8 +17,10 @@ jobs:
     name: Style (stylua + selene)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: ./.github/actions/setup-rokit
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup Rokit
+        uses: ./.github/actions/setup-rokit
       - name: Check formatting
         run: stylua --check src tests ExampleProject
       - name: Lint
@@ -24,8 +30,10 @@ jobs:
     name: Tests + coverage gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: ./.github/actions/setup-rokit
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup Rokit
+        uses: ./.github/actions/setup-rokit
       - name: Run unit tests (fails if coverage drops below 100%)
         run: lune run tests/runTests.luau
 
@@ -33,11 +41,14 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: ./.github/actions/setup-rokit
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup Rokit
+        uses: ./.github/actions/setup-rokit
       - name: Build model
         run: rojo build default.project.json --output posthog-roblox.rbxm
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - name: Upload build artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: posthog-roblox
           path: posthog-roblox.rbxm
