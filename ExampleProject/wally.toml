@@ -11,4 +11,4 @@ realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
 
 [dependencies]
-PostHog = "posthog/posthog-roblox@0.1.0"
+PostHog = "charlesvien/posthog-roblox@0.1.0"

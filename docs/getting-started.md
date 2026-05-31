@@ -24,7 +24,7 @@ Add the dependency to your `wally.toml`:
 
 ```toml
 [dependencies]
-PostHog = "posthog/posthog-roblox@0.1.0"
+PostHog = "charlesvien/posthog-roblox@0.1.0"
 ```
 
 Run `wally install`. Then map the installed package into `ReplicatedStorage` in your Rojo project
