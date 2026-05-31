@@ -21,10 +21,14 @@ evaluate feature flags, and track errors from your Roblox experiences.
 
 ## Installation
 
-Both server and client code require the SDK at `ReplicatedStorage > PostHog`. Pick the path that
-matches your workflow — either one gets you there.
+The SDK must end up at `ReplicatedStorage > PostHog`, where both the server and client code load it
+from. There are two ways to install it and **you only need one.** Pick whichever matches how you
+build your game:
 
-### Wally (Rojo projects)
+- **Option A (Wally)** if you manage dependencies with Wally and build with Rojo.
+- **Option B (model file)** if you build directly in Roblox Studio with no external tooling.
+
+### Option A: Wally (Rojo projects)
 
 Add the dependency to your `wally.toml`:
 
@@ -43,17 +47,17 @@ example `default.project.json`) so it replicates to clients:
 }
 ```
 
-### Model file (no tooling)
+### Option B: Model file (Roblox Studio, no tooling)
 
 Download the latest `posthog-roblox.rbxm` from the
 [releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
 `ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
 named `PostHog`.
 
-### Enable HTTP requests
+## Enable HTTP requests
 
-The SDK sends events over HTTP, which only the Roblox server can do, and only once you allow it:
-**Game Settings → Security → Allow HTTP Requests → On**.
+Whichever option you picked above, the SDK sends events over HTTP, which only the Roblox server can
+do, and only once you allow it: **Game Settings → Security → Allow HTTP Requests → On**.
 
 ## Quick start
 

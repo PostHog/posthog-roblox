@@ -15,10 +15,14 @@ You need two things:
 
 ## 1. Install the SDK
 
-Pick the path that matches your workflow. Either way you end up with `ReplicatedStorage > PostHog`,
-which both server and client code require.
+The SDK must end up at `ReplicatedStorage > PostHog`, where both the server and client code load it
+from. There are two ways to install it and **you only need one.** Pick whichever matches how you
+build your game:
 
-### With Rojo and Wally
+- **Option A (Wally)** if you manage dependencies with Wally and build with Rojo.
+- **Option B (model file)** if you build directly in Roblox Studio with no external tooling.
+
+### Option A: Wally (Rojo projects)
 
 Add the dependency to your `wally.toml`:
 
@@ -27,8 +31,8 @@ Add the dependency to your `wally.toml`:
 PostHog = "posthog/posthog-roblox@0.1.0"
 ```
 
-Run `wally install`. Then map the installed package into `ReplicatedStorage` in your Rojo project
-file (for example `default.project.json`) so it replicates to clients:
+Run `wally install`, then map the package into `ReplicatedStorage` in your Rojo project file (for
+example `default.project.json`) so it replicates to clients:
 
 ```json
 "ReplicatedStorage": {
@@ -37,17 +41,17 @@ file (for example `default.project.json`) so it replicates to clients:
 }
 ```
 
-### Without tooling (model file)
+### Option B: Model file (Roblox Studio, no tooling)
 
 Download the latest `posthog-roblox.rbxm` from the
 [releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
-`ReplicatedStorage` → **Insert from File** and select it. Make sure the inserted instance is named
-`PostHog`.
+`ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
+named `PostHog`.
 
 ## 2. Enable HTTP requests
 
-PostHog sends events over HTTP, which only the Roblox **server** can do, and only when you allow
-it: **Game Settings → Security → Allow HTTP Requests → On**.
+Whichever option you picked above, PostHog sends events over HTTP, which only the Roblox **server**
+can do, and only when you allow it: **Game Settings → Security → Allow HTTP Requests → On**.
 
 ## 3. Initialize on the server
 
