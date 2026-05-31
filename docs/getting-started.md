@@ -1,63 +1,43 @@
-# Getting started with PostHog on Roblox
+# Getting started
 
-This guide takes you from zero to your first event in about 10 minutes. No prior PostHog
-experience needed.
+This is a guided first integration: from an empty place to your first events in PostHog in about
+ten minutes. For installation options and the full reference, see the
+[README](../README.md) and the other guides linked at the end.
 
-## What you'll need
+## Before you start
 
-- A **PostHog account** (free at [posthog.com](https://posthog.com)) and your **project API key**.
-- A **Roblox experience** you can edit in Roblox Studio.
+You need two things:
 
-## 1. Get your project API key
+1. A **PostHog project API key** (starts with `phc_`). Find it in PostHog under
+   **Settings → Project**. Note your host while you are there: `https://us.i.posthog.com` (US) or
+   `https://eu.i.posthog.com` (EU).
+2. A **Roblox place** you can edit in Studio.
 
-In PostHog, open **Settings → Project** and copy the **Project API Key** (it starts with `phc_`).
-While you're there, note your host: `https://us.i.posthog.com` (US) or `https://eu.i.posthog.com`
-(EU).
+## 1. Add the SDK
 
-## 2. Add the SDK to your game
-
-Pick one of the two options.
-
-### Option A — Wally (recommended)
-
-If your project uses [Rojo](https://rojo.space) and [Wally](https://wally.run), add the dependency
-to your `wally.toml`:
+If you use [Rojo](https://rojo.space) and [Wally](https://wally.run), add the dependency to
+`wally.toml`, run `wally install`, and map the package into `ReplicatedStorage`:
 
 ```toml
 [dependencies]
 PostHog = "posthog/posthog-roblox@0.1.0"
 ```
 
-Run `wally install`, then make sure your Rojo project maps the installed package into
-`ReplicatedStorage` so both server and client can reach it:
+No tooling? Insert the latest `posthog-roblox.rbxm` from the
+[releases page](https://github.com/PostHog/posthog-roblox/releases) into `ReplicatedStorage`. The
+[README](../README.md#installation) has both paths in full.
 
-```json
-"ReplicatedStorage": {
-  "$className": "ReplicatedStorage",
-  "PostHog": { "$path": "Packages/PostHog" }
-}
-```
+Either way you should end up with `ReplicatedStorage > PostHog`.
 
-### Option B — Manual (no tooling)
-
-1. Download the latest `posthog-roblox.rbxm` from the
-   [Releases page](https://github.com/PostHog/posthog-roblox/releases).
-2. In Studio, right-click **ReplicatedStorage → Insert from File** and pick the `.rbxm`.
-3. Rename the inserted module to `PostHog` if it isn't already.
-
-You should now have `ReplicatedStorage > PostHog`.
-
-## 3. Enable HTTP requests
+## 2. Enable HTTP requests
 
 PostHog sends events over HTTP, which only the Roblox **server** can do, and only when you allow
-it:
+it: **Game Settings → Security → Allow HTTP Requests → On**.
 
-- **Game Settings → Security → Allow HTTP Requests → On**, or
-- in the command bar: `game:GetService("HttpService").HttpEnabled = true`
+## 3. Initialize on the server
 
-## 4. Initialize on the server
-
-Create a **Script** in **ServerScriptService** (for example `PostHogInit`) and paste:
+Create a `Script` in `ServerScriptService` and initialize the SDK with your key. Use
+`logLevel = "debug"` for now so you can watch it work.
 
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -66,33 +46,38 @@ local PostHog = require(ReplicatedStorage:WaitForChild("PostHog"))
 PostHog:Init({
     apiKey = "phc_YOUR_PROJECT_API_KEY", -- paste your key
     host = "https://us.i.posthog.com",   -- or https://eu.i.posthog.com
+    logLevel = "debug",
 })
 ```
 
-## 5. Capture your first event
+Press **Play**. You already have data: the SDK captures `server_started` and `player_joined`
+automatically. See [Autocapture](autocapture.md) for the full list.
 
-Still on the server, capture an event for each player who joins. Passing the `Player` attributes
-the event to that user (their Roblox `UserId` becomes the PostHog `distinct_id`):
+## 4. Capture your first manual event
+
+Add an event for something specific to your game. Passing the `Player` attributes it to that user.
 
 ```lua
 local Players = game:GetService("Players")
 
 Players.PlayerAdded:Connect(function(player)
-    PostHog:Capture(player, "player_spawned", { team = "red" })
+    PostHog:Capture(player, "tutorial_started", { step = 1 })
 end)
 ```
 
-Press **Play**. The SDK also captures `player_joined` automatically.
+## 5. See it in PostHog
 
-## 6. See it in PostHog
+Open PostHog and go to **Activity**. Within a few seconds you will see `server_started`,
+`player_joined`, and `tutorial_started`. Events send in batches (every 30 seconds, or once 20 are
+queued); call `PostHog:Flush()` to send immediately while testing.
 
-Open PostHog → **Activity** (or **Activity → Explore**). Within a few seconds you'll see
-`player_joined` and `player_spawned`. If you don't, jump to [Troubleshooting](#troubleshooting).
+If nothing shows up, jump to [Troubleshooting](#troubleshooting).
 
-## 7. Capture from the client
+## 6. Capture from the client
 
-You can also capture from a **LocalScript** (for example in `StarterPlayerScripts`). Client calls
-are relayed to the server, which attributes them to the firing player. No API key on the client:
+You can also capture from a `LocalScript` (for example in `StarterPlayerScripts`). Client calls are
+relayed to the server, which attributes them to the firing player. There is no API key on the
+client and no subject argument:
 
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -102,38 +87,44 @@ PostHog:Capture("button_clicked", { button = "play" })
 PostHog:Screen("MainMenu")
 ```
 
-Unhandled client errors are captured automatically as `$exception` events just by requiring the
-SDK on the client.
+Requiring the SDK on the client also captures unhandled client errors automatically.
 
-## 8. Identify players and use feature flags
+## 7. Try identity and a feature flag
 
 ```lua
--- Attach properties to a player's PostHog profile.
+-- Attach properties to the player's profile.
 PostHog:Identify(player, { display_name = player.DisplayName })
 
--- Evaluate a feature flag for a player (server-side).
+-- Evaluate a feature flag for the player (server-side).
 if PostHog:IsFeatureEnabled(player, "new-shop", false) then
     PostHog:Capture(player, "new_shop_shown")
 end
 ```
 
+## Next steps
+
+You now have the basics. Go deeper on each feature:
+
+- [Capturing events](capturing-events.md): subjects, properties, the client relay, super
+  properties, opt-out.
+- [Autocapture](autocapture.md): everything captured for free and how to build a dashboard from it.
+- [Identifying users and groups](identify-and-groups.md): person properties and group analytics.
+- [Feature flags](feature-flags.md): boolean and multivariate flags, payloads, targeting.
+- [Error tracking](error-tracking.md): automatic and manual exception capture.
+- [Sessions and teleports](sessions.md): continue sessions across places.
+- [Configuration](configuration.md): every option.
+- [API reference](api-reference.md): every method.
+
 ## Troubleshooting
 
 No events showing up? Check, in order:
 
-1. **HTTP is enabled** (step 3). Without it, the server cannot send anything.
-2. **`Init` ran on the server** — it must be a `Script` (not a `LocalScript`), and you should see
-   `[PostHog] PostHog initialized` in the output with `logLevel = "debug"`.
-3. **The API key and host are correct** (key starts with `phc_`; host matches your region).
-4. **You pressed Play** long enough for a flush (events send in batches every ~30s, or sooner once
-   20 are queued; call `PostHog:Flush()` to send immediately while testing).
-5. Turn on debug logging to see what's happening:
-
-   ```lua
-   PostHog:Init({ apiKey = "phc_...", logLevel = "debug" })
-   ```
-
-## Next steps
-
-- Full configuration and API reference: [README](../README.md).
-- A runnable demo: the [`ExampleProject`](../ExampleProject) folder.
+1. **HTTP is enabled** (step 2). Without it the server cannot send anything.
+2. **`Init` ran on the server.** It must be in a `Script` (not a `LocalScript`). With
+   `logLevel = "debug"` you should see `PostHog initialized` in the output.
+3. **The key and host are correct.** The key starts with `phc_` and the host matches your region.
+4. **You waited for a flush.** Events batch every ~30 seconds or once 20 are queued. Call
+   `PostHog:Flush()` to send immediately.
+5. **Client events are reaching the server.** The server SDK must be initialized with
+   `enableClientRelay = true` (the default). If the client logs that the relay was not found, the
+   server SDK is not running.

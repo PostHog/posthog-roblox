@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `player_idle` autocapture event from `Player.Idled` for engagement tracking.
 - `player_count` on `player_joined` and `player_left` for concurrency (CCU) tracking.
 - `platform` and `country_code` on `player_left`.
+- Per-feature documentation under `docs/` (capturing events, autocapture, identity and
+  groups, feature flags, error tracking, sessions, configuration, API reference).
+
+### Changed
+
+- Slimmed the README to installation plus a documentation index; deep dives now live in `docs/`.
 
 ## [0.1.0] - 2026-05-30
 
