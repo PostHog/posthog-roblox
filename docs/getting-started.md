@@ -1,8 +1,8 @@
 # Getting started
 
-This is a guided first integration: from an empty place to your first events in PostHog in about
-ten minutes. For installation options and the full reference, see the
-[README](../README.md) and the other guides linked at the end.
+This guide takes you from an empty place to your first events in PostHog in about ten minutes. It
+is self-contained: follow it top to bottom and you will have the SDK installed, initialized, and
+sending data. For a deeper look at any feature, see the guides linked at the end.
 
 ## Before you start
 
@@ -13,21 +13,36 @@ You need two things:
    `https://eu.i.posthog.com` (EU).
 2. A **Roblox place** you can edit in Studio.
 
-## 1. Add the SDK
+## 1. Install the SDK
 
-If you use [Rojo](https://rojo.space) and [Wally](https://wally.run), add the dependency to
-`wally.toml`, run `wally install`, and map the package into `ReplicatedStorage`:
+Pick the path that matches your workflow. Either way you end up with `ReplicatedStorage > PostHog`,
+which both server and client code require.
+
+### With Rojo and Wally
+
+Add the dependency to your `wally.toml`:
 
 ```toml
 [dependencies]
 PostHog = "posthog/posthog-roblox@0.1.0"
 ```
 
-No tooling? Insert the latest `posthog-roblox.rbxm` from the
-[releases page](https://github.com/PostHog/posthog-roblox/releases) into `ReplicatedStorage`. The
-[README](../README.md#installation) has both paths in full.
+Run `wally install`. Then map the installed package into `ReplicatedStorage` in your Rojo project
+file (for example `default.project.json`) so it replicates to clients:
 
-Either way you should end up with `ReplicatedStorage > PostHog`.
+```json
+"ReplicatedStorage": {
+  "$className": "ReplicatedStorage",
+  "PostHog": { "$path": "Packages/PostHog" }
+}
+```
+
+### Without tooling (model file)
+
+Download the latest `posthog-roblox.rbxm` from the
+[releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
+`ReplicatedStorage` → **Insert from File** and select it. Make sure the inserted instance is named
+`PostHog`.
 
 ## 2. Enable HTTP requests
 

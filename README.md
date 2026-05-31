@@ -14,34 +14,11 @@ evaluate feature flags, and track errors from your Roblox experiences.
 - HTTP requests enabled for your experience (Game Settings → Security → **Allow HTTP Requests**).
 - A PostHog project API key (starts with `phc_`).
 
-## Installation
+## Quick look
 
-### Wally (recommended)
-
-Add the dependency to your `wally.toml`:
-
-```toml
-[dependencies]
-PostHog = "posthog/posthog-roblox@0.1.0"
-```
-
-Then run `wally install`. Map the resulting `Packages` folder into `ReplicatedStorage` in your
-Rojo project so both the server and client can `require` it:
-
-```json
-"ReplicatedStorage": {
-  "$className": "ReplicatedStorage",
-  "PostHog": { "$path": "Packages/PostHog" }
-}
-```
-
-### Manual
-
-Download the latest `posthog-roblox.rbxm` from the
-[releases page](https://github.com/PostHog/posthog-roblox/releases) and insert it into
-`ReplicatedStorage` (right-click → **Insert from File**). Make sure it is named `PostHog`.
-
-## Hello world
+The [getting started guide](docs/getting-started.md) is the place to begin: it covers installation
+(Wally or a model file), enabling HTTP, and verifying your first events in PostHog. Once
+`ReplicatedStorage > PostHog` is in place, an integration looks like this.
 
 Server (a `Script` in `ServerScriptService`):
 
@@ -64,14 +41,11 @@ local PostHog = require(game.ReplicatedStorage:WaitForChild("PostHog"))
 PostHog:Capture("button_clicked", { button = "play" }) -- relayed to the server
 ```
 
-That is enough to start sending data. The [getting started guide](docs/getting-started.md) walks
-through it step by step and shows how to verify events in PostHog.
-
 ## Documentation
 
 | Guide | What it covers |
 | ----- | -------------- |
-| [Getting started](docs/getting-started.md) | A guided first integration, from install to your first events in PostHog. |
+| [Getting started](docs/getting-started.md) | **Start here.** Install, initialize, and see your first events in PostHog. |
 | [Capturing events](docs/capturing-events.md) | `Capture` and `Screen`, server subjects, the client relay, event properties, super properties, opt-out. |
 | [Autocapture](docs/autocapture.md) | Events and context captured automatically, and how to build a dashboard with zero manual events. |
 | [Identifying users and groups](docs/identify-and-groups.md) | `Identify`, person properties, `Alias`, person profiles, and `Group` analytics. |
