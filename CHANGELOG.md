@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Server lifecycle autocapture: `server_started` and `server_shutdown` events with
+  `player_count`, `uptime_seconds`, and private/reserved server flags.
+- `player_idle` autocapture event from `Player.Idled` for engagement tracking.
+- `player_count` on `player_joined` and `player_left` for concurrency (CCU) tracking.
+- `platform` and `country_code` on `player_left`.
+
 ## [0.1.0] - 2026-05-30
 
 ### Added
