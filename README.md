@@ -10,6 +10,10 @@ evaluate feature flags, and track errors from your Roblox experiences.
   autocapture that records meaningful session metrics out of the box, so you can chart real player
   behavior before writing a single manual event.
 
+> **Note:** This SDK is in **beta**. It's ready to try, but the API may still change before a
+> stable release. If you hit a bug or have feedback, please
+> [open an issue](https://github.com/PostHog/posthog-roblox/issues). We'd love to hear from you.
+
 ## Requirements
 
 - HTTP requests enabled for your experience (Game Settings → Security → **Allow HTTP Requests**).
