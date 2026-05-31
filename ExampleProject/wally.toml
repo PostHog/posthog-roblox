@@ -5,10 +5,10 @@
 [package]
 name = "posthog/posthog-roblox-example"
 description = "Example game using the PostHog Roblox SDK"
-version = "0.1.0"
+version = "0.1.3"
 license = "MIT"
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
 
 [dependencies]
-PostHog = "posthog/posthog-roblox@0.1.0"
+PostHog = "posthogx/posthog-roblox@0.1.3"

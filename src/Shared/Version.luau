@@ -3,6 +3,6 @@
 -- Keep `SdkVersion` in sync with the `version` field in wally.toml.
 
 return {
-    SdkVersion = "0.1.0",
+    SdkVersion = "0.1.3",
     LibraryName = "posthog-roblox",
 }
