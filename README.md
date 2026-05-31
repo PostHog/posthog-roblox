@@ -7,7 +7,8 @@ evaluate feature flags, and track errors from your Roblox experiences.
   allows outbound requests). A thin client module relays calls to the server.
 - **Per-player.** Each player is a PostHog user, keyed by their `UserId`.
 - **Batteries included.** Events, identity, groups, feature flags, error tracking, and lifecycle
-  autocapture, with a useful dashboard out of the box and no manual events required.
+  autocapture that records meaningful session metrics out of the box, so you can chart real player
+  behavior before writing a single manual event.
 
 ## Requirements
 
