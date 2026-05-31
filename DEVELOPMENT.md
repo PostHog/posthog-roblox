@@ -167,7 +167,7 @@ server and client scripts, so edits to `src/` are reflected immediately. To run 
 1. Open a new baseplate in Studio and connect the Rojo plugin.
 2. Set your API key in
    [`ExampleProject/src/server/PostHogDemo.server.luau`](ExampleProject/src/server/PostHogDemo.server.luau).
-3. Enable HTTP: **Game Settings → Security → Allow HTTP Requests** (and **Allow Studio Access to API
+3. Enable HTTP: **Game Settings -> Security -> Allow HTTP Requests** (and **Allow Studio Access to API
    Services** so DataStores/HTTP work in Studio).
 4. Press **Play**. Autocaptured and demo events should appear in your PostHog project's activity
    feed within a few seconds.

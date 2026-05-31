@@ -5,7 +5,7 @@ which triggers on a `v*` tag.
 
 ## One-time setup
 
-Add a `WALLY_TOKEN` repository secret (Settings → Secrets and variables → Actions). Generate it by
+Add a `WALLY_TOKEN` repository secret (Settings -> Secrets and variables -> Actions). Generate it by
 running `wally login` locally and copying the token from `~/.wally/auth.toml`.
 
 ## Cutting a release

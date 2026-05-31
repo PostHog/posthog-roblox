@@ -16,7 +16,7 @@ evaluate feature flags, and track errors from your Roblox experiences.
 
 ## Requirements
 
-- HTTP requests enabled for your experience (Game Settings → Security → **Allow HTTP Requests**).
+- HTTP requests enabled for your experience (Game Settings -> Security -> **Allow HTTP Requests**).
 - A PostHog project API key (starts with `phc_`).
 
 ## Installation
@@ -51,13 +51,13 @@ example `default.project.json`) so it replicates to clients:
 
 Download the latest `posthog-roblox.rbxm` from the
 [releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
-`ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
+`ReplicatedStorage` -> **Insert from File**, select the file, and make sure the inserted instance is
 named `PostHog`.
 
 ## Enable HTTP requests
 
 Whichever option you picked above, the SDK sends events over HTTP, which only the Roblox server can
-do, and only once you allow it: **Game Settings → Security → Allow HTTP Requests → On**.
+do, and only once you allow it: **Game Settings -> Security -> Allow HTTP Requests -> On**.
 
 ## Quick start
 

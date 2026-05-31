@@ -9,7 +9,7 @@ sending data. For a deeper look at any feature, see the guides linked at the end
 You need two things:
 
 1. A **PostHog project API key** (starts with `phc_`). Find it in PostHog under
-   **Settings → Project**. Note your host while you are there: `https://us.i.posthog.com` (US) or
+   **Settings -> Project**. Note your host while you are there: `https://us.i.posthog.com` (US) or
    `https://eu.i.posthog.com` (EU).
 2. A **Roblox place** you can edit in Studio.
 
@@ -45,13 +45,13 @@ example `default.project.json`) so it replicates to clients:
 
 Download the latest `posthog-roblox.rbxm` from the
 [releases page](https://github.com/PostHog/posthog-roblox/releases). In Studio, right-click
-`ReplicatedStorage` → **Insert from File**, select the file, and make sure the inserted instance is
+`ReplicatedStorage` -> **Insert from File**, select the file, and make sure the inserted instance is
 named `PostHog`.
 
 ## 2. Enable HTTP requests
 
 Whichever option you picked above, PostHog sends events over HTTP, which only the Roblox **server**
-can do, and only when you allow it: **Game Settings → Security → Allow HTTP Requests → On**.
+can do, and only when you allow it: **Game Settings -> Security -> Allow HTTP Requests -> On**.
 
 ## 3. Initialize on the server
 
