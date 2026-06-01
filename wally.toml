@@ -1,7 +1,7 @@
 [package]
 name = "posthog/posthog-roblox"
 description = "PostHog analytics SDK for Roblox. Capture events, identify players, evaluate feature flags, and track errors."
-version = "0.1.3"
+version = "0.1.5"
 license = "MIT"
 authors = ["PostHog <engineering@posthog.com>"]
 realm = "shared"
