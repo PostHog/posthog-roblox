@@ -6,6 +6,6 @@ license = "MIT"
 authors = ["PostHog <engineering@posthog.com>"]
 realm = "shared"
 registry = "https://github.com/UpliftGames/wally-index"
-exclude = ["ExampleProject", "tests", "*.spec.luau"]
+exclude = ["ExampleProject", "tests", "*.spec.luau", "node_modules"]
 
 [dependencies]
