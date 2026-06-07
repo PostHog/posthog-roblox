@@ -5,6 +5,6 @@
 -- edit the version by hand; add a changeset instead (see RELEASING.md).
 
 return {
-    SdkVersion = "0.1.5",
+    SdkVersion = "0.1.6",
     LibraryName = "posthog-roblox",
 }
