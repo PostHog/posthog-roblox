@@ -74,7 +74,7 @@ Users install a specific version through Wally:
 
 ```toml
 [dependencies]
-PostHog = "posthog/posthog-roblox@0.1.5"
+PostHog = "posthog/posthog-roblox@0.1.6"
 ```
 
 Or download a specific `posthog-roblox.rbxm` from the
