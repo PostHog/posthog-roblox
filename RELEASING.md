@@ -38,8 +38,8 @@ When a PR containing a changeset is merged to `main`, the release workflow
 ([`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
 1. Detects pending changesets.
-2. Sends a Slack notification (if the Slack secrets are configured; otherwise skipped).
-3. Runs the `version-bump` job, which:
+2. Sends a Slack notification requesting approval.
+3. On approval (via the `Release` GitHub environment):
    - Applies changesets (bumps `package.json`, updates `CHANGELOG.md`).
    - Syncs the version to `wally.toml` and `src/Shared/Version.luau` via `scripts/bump-version.sh`.
    - Runs the test + coverage gate.
@@ -47,31 +47,38 @@ When a PR containing a changeset is merged to `main`, the release workflow
    - Builds `posthog-roblox.rbxm` and publishes the package to the Wally registry.
    - Creates a GitHub release with the model attached and notes from the changelog.
 
-The job uses the built-in `GITHUB_TOKEN` to push the version-bump commit and tag (`main` is not
-branch-protected, so no GitHub App is needed).
-
 You can also trigger the workflow manually from the
 [Actions tab](../../actions/workflows/release.yml) via **Run workflow**.
 
 ## One-time setup
 
-The release workflow needs `WALLY_TOKEN` to publish. The Slack secrets and variables are optional:
-when they are absent, the notification steps are skipped and the release still runs (Settings ->
-Secrets and variables -> Actions):
+The release workflow needs these repository secrets and variables (Settings -> Secrets and
+variables -> Actions):
 
-| Name | Type | Required | Purpose |
-| --- | --- | --- | --- |
-| `WALLY_TOKEN` | secret | yes | wally.run API token (`wally login`, then copy from `~/.wally/auth.toml`). |
-| `SLACK_CLIENT_LIBRARIES_BOT_TOKEN` | secret | no | Slack bot token for release notifications (shared org secret). |
-| `POSTHOG_PROJECT_API_KEY` | secret | no | Used by the approval-notification workflow. |
-| `SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID` | variable | no | Slack channel for release notifications. |
-| `GROUP_CLIENT_LIBRARIES_SLACK_GROUP_ID` | variable | no | Slack user group to ping. |
+| Name | Type | Purpose |
+| --- | --- | --- |
+| `WALLY_TOKEN` | secret | wally.run API token (`wally login`, then copy from `~/.wally/auth.toml`). |
+| `GH_APP_POSTHOG_RELEASER_APP_ID` | secret | GitHub App used to push the version-bump commit and tag to `main`. |
+| `GH_APP_POSTHOG_RELEASER_PRIVATE_KEY` | secret | Private key for the same GitHub App. |
+| `SLACK_CLIENT_LIBRARIES_BOT_TOKEN` | secret | Slack bot token for approval notifications (shared org secret). |
+| `POSTHOG_PROJECT_API_KEY` | secret | Used by the approval-notification workflow. |
+| `SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID` | variable | Slack channel for approval requests. |
+| `GROUP_CLIENT_LIBRARIES_SLACK_GROUP_ID` | variable | Slack user group to ping for approvals. |
 
-### Optional approval gate
+### GitHub App and ruleset bypass
 
-The `version-bump` job runs in the `Release` GitHub environment. By default that environment has no
-protection rules, so the release proceeds automatically. To require a human to approve each release,
-add required reviewers to the `Release` environment (Settings -> Environments -> Release).
+`main` is protected by a "Require pull request" ruleset, so the version-bump job cannot push the
+release commit with the default `GITHUB_TOKEN`. It authenticates as a GitHub App instead:
+
+1. Create (or reuse) a GitHub App with **Contents: read and write** repository permission, install
+   it on this repo, and store its App ID and a private key as the `GH_APP_POSTHOG_RELEASER_*`
+   secrets above.
+2. Add that App as a **bypass actor** on the "Require pull request" ruleset
+   (Settings -> Rules -> Rulesets -> Require pull request -> Bypass list). Without this the
+   `Commit version bump` step fails with a rule-violation error.
+
+The `Release` environment gates the job. It has no required reviewers by default (the release runs
+automatically); add reviewers there to require manual approval before each release.
 
 ## Version pinning for users
 
