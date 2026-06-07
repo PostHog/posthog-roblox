@@ -1,0 +1,35 @@
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+    merge_group:
+
+name: Security
+
+permissions:
+    contents: read
+
+env:
+    SEMGREP_ENABLE_VERSION_CHECK: 'false'
+
+jobs:
+    semgrep:
+        runs-on: ubuntu-latest
+        container:
+            image: semgrep/semgrep:1.163.0@sha256:7cad2bc2d1e44f87f0bf4be6d1fa23aa90fb72015bebc89fb91385d813987a03
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+            - name: Run Semgrep
+              run: |
+                  semgrep \
+                    --config "p/owasp-top-ten" \
+                    --config "p/security-audit" \
+                    --config "p/trailofbits" \
+                    --config "p/github-actions" \
+                    --error \
+                    --metrics=off \
+                    .
