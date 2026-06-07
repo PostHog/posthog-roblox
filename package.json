@@ -1,0 +1,12 @@
+{
+  "name": "posthog-roblox",
+  "version": "0.1.5",
+  "private": true,
+  "packageManager": "pnpm@11.3.0",
+  "scripts": {
+    "changeset": "changeset"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.4"
+  }
+}
