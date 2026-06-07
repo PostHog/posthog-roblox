@@ -58,8 +58,8 @@ variables -> Actions):
 | Name | Type | Purpose |
 | --- | --- | --- |
 | `WALLY_TOKEN` | secret | wally.run API token (`wally login`, then copy from `~/.wally/auth.toml`). |
-| `GH_APP_POSTHOG_RELEASER_APP_ID` | secret | GitHub App used to push the version-bump commit and tag to `main`. |
-| `GH_APP_POSTHOG_RELEASER_PRIVATE_KEY` | secret | Private key for the same GitHub App. |
+| `GH_APP_POSTHOG_ROBLOX_RELEASER_APP_ID` | secret | GitHub App used to push the version-bump commit and tag to `main`. |
+| `GH_APP_POSTHOG_ROBLOX_RELEASER_PRIVATE_KEY` | secret | Private key for the same GitHub App. |
 | `SLACK_CLIENT_LIBRARIES_BOT_TOKEN` | secret | Slack bot token for approval notifications (shared org secret). |
 | `POSTHOG_PROJECT_API_KEY` | secret | Used by the approval-notification workflow. |
 | `SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID` | variable | Slack channel for approval requests. |
@@ -71,7 +71,7 @@ variables -> Actions):
 release commit with the default `GITHUB_TOKEN`. It authenticates as a GitHub App instead:
 
 1. Create (or reuse) a GitHub App with **Contents: read and write** repository permission, install
-   it on this repo, and store its App ID and a private key as the `GH_APP_POSTHOG_RELEASER_*`
+   it on this repo, and store its App ID and a private key as the `GH_APP_POSTHOG_ROBLOX_RELEASER_*`
    secrets above.
 2. Add that App as a **bypass actor** on the "Require pull request" ruleset
    (Settings -> Rules -> Rulesets -> Require pull request -> Bypass list). Without this the
