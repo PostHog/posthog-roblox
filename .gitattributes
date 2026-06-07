@@ -1,0 +1,19 @@
+* text=auto eol=lf
+
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.svg binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.tif binary
+
+# Roblox binaries
+*.rbxm binary
+*.rbxl binary
+*.rbxmx binary
+*.rbxlx binary
