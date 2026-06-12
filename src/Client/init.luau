@@ -10,6 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ScriptContext = game:GetService("ScriptContext")
 
 local Defaults = require(script.Parent.Shared.Defaults)
+local Types = require(script.Parent.Shared.Types)
 local Platform = require(script.Platform)
 
 local MAX_BUFFER = 100
@@ -74,7 +75,7 @@ local function connectErrors()
         return
     end
     errorConnection = ScriptContext.Error:Connect(function(message, trace, _script)
-        deliver({ kind = "exception", message = message, trace = trace })
+        deliver({ kind = "exception", message = message, trace = trace, handled = false })
     end)
 end
 
@@ -103,11 +104,27 @@ function PostHogClient:Screen(screenName: string, properties: { [string]: any }?
 end
 
 function PostHogClient:CaptureException(
-    message: string,
+    exception: string | Types.ExceptionInput,
     trace: string?,
     properties: { [string]: any }?
 )
-    deliver({ kind = "exception", message = message, trace = trace, properties = properties })
+    local message = exception
+    local errorType = nil
+    if type(exception) == "table" then
+        message = if type(exception.message) == "string" then exception.message else ""
+        errorType = if type(exception.type) == "string" then exception.type else nil
+        if trace == nil and type(exception.trace) == "string" then
+            trace = exception.trace
+        end
+    end
+    deliver({
+        kind = "exception",
+        message = message,
+        trace = trace,
+        errorType = errorType,
+        handled = true,
+        properties = properties,
+    })
 end
 
 -- Flushing happens server side; provided for API symmetry.

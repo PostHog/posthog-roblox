@@ -62,6 +62,14 @@ export type Config = {
     enableClientRelay: boolean?,
 }
 
+-- Structured input for CaptureException. Anywhere an ExceptionInput is accepted a
+-- plain message string works too, since Luau errors are strings natively.
+export type ExceptionInput = {
+    type: string?,
+    message: string,
+    trace: string?,
+}
+
 -- A single PostHog event, ready to serialize to JSON.
 export type Event = {
     uuid: string,

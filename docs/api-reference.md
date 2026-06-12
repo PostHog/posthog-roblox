@@ -50,9 +50,10 @@ Captures an event. See [Capturing events](capturing-events.md).
 
 Captures a `$screen` event with a `$screen_name` property.
 
-#### `PostHog:CaptureException(subject, message, trace?, properties?)`
+#### `PostHog:CaptureException(subject, exception, trace?, properties?)`
 
-Captures a handled error as a `$exception`. See [Error tracking](error-tracking.md).
+Captures a handled error as a `$exception`. `exception` is a message string or a structured
+`{ type?, message, trace? }` table. See [Error tracking](error-tracking.md).
 
 ### Identity
 
@@ -133,9 +134,10 @@ Relays an event to the server. Reserved (`$`-prefixed) names are rejected server
 
 Relays a screen view.
 
-#### `PostHog:CaptureException(message, trace?, properties?)`
+#### `PostHog:CaptureException(exception, trace?, properties?)`
 
-Relays a handled error.
+Relays a handled error. `exception` is a message string or a structured
+`{ type?, message, trace? }` table.
 
 #### `PostHog:Flush()`
 
@@ -148,6 +150,12 @@ Always `true` on the client.
 ## Types
 
 ```lua
+type ExceptionInput = {
+    type: string?,  -- defaults to "Error"
+    message: string,
+    trace: string?, -- used when no trace argument is passed
+}
+
 type FeatureFlag = {
     key: string,
     value: boolean | string, -- true/false for boolean flags, or the variant string

@@ -488,7 +488,7 @@ end
 
 function PostHog:CaptureException(
     subject: any,
-    message: string,
+    exception: string | Types.ExceptionInput,
     trace: string?,
     properties: Types.Properties?
 )
@@ -496,8 +496,10 @@ function PostHog:CaptureException(
         return
     end
     local state, serverScoped = resolveSubject(subject)
-    local props = ExceptionBuilder.build(message, trace, {
+    local message, resolvedTrace, exceptionType = ExceptionBuilder.normalize(exception, trace)
+    local props = ExceptionBuilder.build(message, resolvedTrace, {
         handled = true,
+        exceptionType = exceptionType,
         mechanismType = "generic",
     })
     if properties then

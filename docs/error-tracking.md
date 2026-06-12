@@ -52,6 +52,17 @@ if not ok then
 end
 ```
 
+Both sides also accept a structured error instead of a string, so you can categorize exceptions
+with your own type (it becomes `$exception_type`, which defaults to `"Error"`):
+
+```lua
+PostHog:CaptureException(player, {
+    type = "ShopError",
+    message = "purchase receipt rejected",
+    trace = debug.traceback(),
+})
+```
+
 ## What an `$exception` event looks like
 
 The SDK parses the Roblox traceback into stack frames and builds the standard PostHog exception
@@ -96,11 +107,12 @@ shape:
 
 The `mechanism.type` tells you where the error came from:
 
-| Source                          | `mechanism.type`        | `handled` |
-| ------------------------------- | ----------------------- | --------- |
-| automatic server error          | `roblox.ScriptContext`  | `false`   |
-| automatic client error (relayed) | `roblox.client`         | `false`   |
-| manual `CaptureException`        | `generic`               | `true`    |
+| Source                                    | `mechanism.type`       | `handled` |
+| ----------------------------------------- | ---------------------- | --------- |
+| automatic server error                    | `roblox.ScriptContext` | `false`   |
+| automatic client error (relayed)          | `roblox.client`        | `false`   |
+| manual server `CaptureException`          | `generic`              | `true`    |
+| manual client `CaptureException` (relayed) | `roblox.client`        | `true`    |
 
 ## See also
 

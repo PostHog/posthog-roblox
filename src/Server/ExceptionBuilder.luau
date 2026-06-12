@@ -69,6 +69,26 @@ function ExceptionBuilder.parseTraceback(trace: string?): { any }
     return frames
 end
 
+-- Normalizes the public CaptureException input: a plain message string or a
+-- structured { type?, message, trace? } table (Types.ExceptionInput). An explicit
+-- trace argument wins over a trace carried in the table. Any other value is
+-- stringified. Returns (message, trace, exceptionType).
+function ExceptionBuilder.normalize(exception: any, trace: string?): (string, string?, string?)
+    if type(exception) == "table" then
+        local message = if type(exception.message) == "string" then exception.message else ""
+        local tableTrace = if type(exception.trace) == "string" then exception.trace else nil
+        local exceptionType = if type(exception.type) == "string" then exception.type else nil
+        return message, trace or tableTrace, exceptionType
+    end
+    if type(exception) == "string" then
+        return exception, trace, nil
+    end
+    if exception == nil then
+        return "", trace, nil
+    end
+    return tostring(exception), trace, nil
+end
+
 -- Builds the `$exception` event properties.
 -- opts: {
 --   handled: boolean?,        -- true for manual CaptureException, false for global handler
