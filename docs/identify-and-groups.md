@@ -59,6 +59,31 @@ PostHog:Alias(player, "external-account-12345")
 You rarely need this in Roblox because the `UserId` is already a stable identity. Reach for it
 only when you genuinely have two ids for one person.
 
+## Stable ids across systems
+
+Subjects are not limited to `Player` instances: every method that takes a subject also accepts a
+plain string distinct id, so you can attribute events to an id you control. If your game shares
+users with a system outside Roblox (your own account system, a backend, a website), you have two
+options:
+
+- **Keep `UserId` as the distinct id and link the external id** (recommended):
+
+  ```lua
+  PostHog:Alias(player, "acct_8f3a2b")
+  ```
+
+  Events keep flowing under the player's `UserId` while PostHog merges both ids into one person.
+
+- **Capture directly against your own id**, bypassing the player entirely:
+
+  ```lua
+  PostHog:Capture("acct_8f3a2b", "subscription_renewed", { plan = "pro" })
+  PostHog:Identify("acct_8f3a2b", { plan = "pro" })
+  ```
+
+  Sessions and autocaptured player events still use the `UserId` identity, so prefer `Alias`
+  unless the events genuinely concern a non-player entity.
+
 ## Groups
 
 Group analytics let you roll players up into a shared entity (a guild, a party, a clan, a server

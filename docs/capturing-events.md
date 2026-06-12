@@ -37,6 +37,9 @@ The subject resolves to the PostHog `distinct_id` that the event is attributed t
 | a `string`    | the string, used as-is                          | your own id scheme                  |
 | `nil`         | `config.serverDistinctId` (default `"server"`)  | server-wide events not tied to a player |
 
+See [Stable ids across systems](identify-and-groups.md#stable-ids-across-systems) for using your
+own id scheme alongside players.
+
 A `nil` subject marks the event server-scoped. Server-scoped events are sent with
 `$process_person_profile = false` so they never create a person profile for the server. See
 [person profiles](identify-and-groups.md#person-profiles).

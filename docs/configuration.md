@@ -93,6 +93,11 @@ See [Autocapture](autocapture.md) and [Error tracking](error-tracking.md).
 - `"always"`: every event creates or updates a profile.
 - `"never"`: no event creates a profile.
 
+`serverDistinctId` only applies to events about the server itself: pass `nil` as the subject (or
+let autocapture emit `server_started` / `server_shutdown` / server `$exception` events) and the
+event is attributed to this id. It never affects player events, and clients can never choose their
+own distinct id; the server always derives it from the firing player's `UserId`.
+
 See [Person profiles](identify-and-groups.md#person-profiles).
 
 ### Client events

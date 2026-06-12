@@ -18,6 +18,10 @@ Every server method that acts on a user takes a **subject** as its first argumen
 | a `string` | the string, used as-is                          |
 | `nil`      | `config.serverDistinctId` (server-scoped event) |
 
+A subject is just a distinct id, so players are not the only option: pass any string to attribute
+events to an id you control (for example an account id shared with your other platforms). See
+[Stable ids across systems](identify-and-groups.md#stable-ids-across-systems).
+
 ## Server API
 
 ### Lifecycle
@@ -150,6 +154,8 @@ Always `true` on the client.
 ## Types
 
 ```lua
+type Subject = Player | number | string -- see Subjects above; nil means the server itself
+
 type ExceptionInput = {
     type: string?,  -- defaults to "Error"
     message: string,
