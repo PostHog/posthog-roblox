@@ -33,14 +33,18 @@ CI runs the same checks, so run them before you push.
 2. **Write tests** for new functionality. Pure modules are held to a 100% coverage gate (see
    [DEVELOPMENT.md](DEVELOPMENT.md#tests-and-the-coverage-gate)).
 3. **Run tests, lint and format** before submitting.
-4. **Add a changeset** if your change should appear in the changelog:
+4. **Add a changeset** if your change should appear in the changelog: create a markdown file in
+   `.sampo/changesets/` with the bump level (patch/minor/major) and a short summary:
 
-   ```sh
-   pnpm changeset
+   ```markdown
+   ---
+   posthog-roblox: patch
+   ---
+
+   A short, user-facing description of the change.
    ```
 
-   Pick the bump level (patch/minor/major) and write a short summary. See
-   [RELEASING.md](RELEASING.md) for details.
+   See [RELEASING.md](RELEASING.md#adding-a-changeset) for details.
 5. **Use a Conventional Commits PR title** (e.g. `feat: add feature flag polling`). CI validates this.
 
 ## Getting help

@@ -127,7 +127,9 @@ run the test suite with `lune run tests/runTests.luau`. See **[DEVELOPMENT.md](D
 the full guide: toolchain, tests and the coverage gate, linting and formatting, building the model
 file, and running the example in Roblox Studio.
 
-Releases are automated on tag push; see [RELEASING.md](RELEASING.md).
+Releases are semi-automated: merging a PR that contains a changeset triggers the release workflow,
+which waits for maintainer approval in the `#approvals-client-libraries` Slack channel before
+versioning, tagging and publishing. See [RELEASING.md](RELEASING.md).
 
 ## License
 

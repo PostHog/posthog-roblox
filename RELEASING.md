@@ -1,46 +1,44 @@
 # Releasing
 
-Releases use [changesets](https://github.com/changesets/changesets) for version management and
-changelog generation. The version lives in the root `package.json` and is synced to `wally.toml`
-and `src/Shared/Version.luau` automatically at release time:
+Releases follow the
+[PostHog SDK release process](https://posthog.com/handbook/engineering/sdks/releases) and use
+[sampo](https://github.com/PostHog/sampo) for version management and changelog generation. The
+version lives in the root `package.json` (a stub manifest that exists only so sampo has a package
+to version; the SDK has no JavaScript dependencies) and is synced to `wally.toml` and
+`src/Shared/Version.luau` automatically at release time:
 
 1. Add a changeset to your PR describing the change.
-2. Merge the PR. GitHub Actions handles the rest (no release label required).
-
-## Prerequisites
-
-- [Node.js](https://nodejs.org/) (see `.nvmrc` for the version)
-- [pnpm](https://pnpm.io/) installed (`npm install -g pnpm`)
-
-Run `pnpm install` to install dependencies.
+2. Merge the PR. After a maintainer approves the release, GitHub Actions handles the rest.
 
 ## Adding a changeset
 
-When you make a change that should be included in the next release, add a changeset:
+When you make a change that should be included in the next release, add a markdown file to
+`.sampo/changesets/` (any file name works):
 
-```bash
-pnpm changeset
+```markdown
+---
+posthog-roblox: patch
+---
+
+A short, user-facing description of the change.
 ```
 
-This prompts you to:
+Follow [Semantic Versioning](https://semver.org/): **patch** for backwards-compatible bug fixes,
+**minor** for backwards-compatible features, **major** for breaking changes.
 
-1. Select the package (`posthog-roblox`).
-2. Choose the semver bump type (patch/minor/major).
-3. Write a summary of the change.
-
-The changeset file is created in `.changeset/` and should be committed with your PR. Follow
-[Semantic Versioning](https://semver.org/): **patch** for backwards-compatible bug fixes, **minor**
-for backwards-compatible features, **major** for breaking changes.
+If you have the [sampo CLI](https://github.com/PostHog/sampo) installed (`cargo install sampo`),
+`sampo add` creates the file interactively.
 
 ## Release process
 
 When a PR containing a changeset is merged to `main`, the release workflow
 ([`.github/workflows/release.yml`](.github/workflows/release.yml)):
 
-1. Detects pending changesets.
-2. Sends a Slack notification requesting approval.
+1. Detects pending changesets in `.sampo/changesets/`.
+2. Sends a Slack notification to `#approvals-client-libraries` requesting approval.
 3. On approval (via the `Release` GitHub environment):
-   - Applies changesets (bumps `package.json`, updates `CHANGELOG.md`).
+   - Runs `sampo release`: bumps `package.json`, updates `CHANGELOG.md` and removes the consumed
+     changesets.
    - Syncs the version to `wally.toml` and `src/Shared/Version.luau` via `scripts/bump-version.sh`.
    - Runs the test + coverage gate.
    - Commits the version bump to `main` and creates a `vX.Y.Z` tag.
@@ -65,20 +63,27 @@ variables -> Actions):
 | `SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID` | variable | Slack channel for approval requests. |
 | `GROUP_CLIENT_LIBRARIES_SLACK_GROUP_ID` | variable | Slack user group to ping for approvals. |
 
+### Release environment
+
+The `Release` environment gates the version-bump job. Per the handbook it must be configured with:
+
+- Required reviewers: `PostHog/client-libraries-approvers` and `PostHog/team-client-libraries`
+  (both teams need at least write access on the repository).
+- **Prevent self-review** enabled.
+- **Allow administrators to bypass configured protection rules** disabled.
+
 ### GitHub App and ruleset bypass
 
 `main` is protected by a "Require pull request" ruleset, so the version-bump job cannot push the
 release commit with the default `GITHUB_TOKEN`. It authenticates as a GitHub App instead:
 
-1. Create (or reuse) a GitHub App with **Contents: read and write** repository permission, install
-   it on this repo, and store its App ID and a private key as the `GH_APP_POSTHOG_ROBLOX_RELEASER_*`
-   secrets above.
+1. Create (or reuse) a GitHub App named `Releaser (posthog-roblox)` with **Contents: read and
+   write** repository permission, install it on this repo only, and store its client ID and a
+   private key as the `GH_APP_POSTHOG_ROBLOX_RELEASER_*` secrets above.
 2. Add that App as a **bypass actor** on the "Require pull request" ruleset
-   (Settings -> Rules -> Rulesets -> Require pull request -> Bypass list). Without this the
-   `Commit version bump` step fails with a rule-violation error.
-
-The `Release` environment gates the job. It has no required reviewers by default (the release runs
-automatically); add reviewers there to require manual approval before each release.
+   (Settings -> Rules -> Rulesets -> Require pull request -> Bypass list) and on the CodeQL
+   ruleset if present. Without this the `Commit version bump` step fails with a rule-violation
+   error.
 
 ## Version pinning for users
 
@@ -96,9 +101,10 @@ Or download a specific `posthog-roblox.rbxm` from the
 
 ### Release workflow didn't trigger
 
-It only triggers when a PR that adds a `.changeset/*.md` file is merged to `main`, or when run
-manually via **Run workflow**.
+It only triggers when a PR that adds a `.sampo/changesets/*.md` file is merged to `main`, or when
+run manually via **Run workflow**.
 
 ### "No changesets found"
 
-Ensure your PR includes a changeset file in `.changeset/`. Run `pnpm changeset` to create one.
+Ensure your PR includes a changeset file in `.sampo/changesets/`. See
+[Adding a changeset](#adding-a-changeset).
