@@ -3,7 +3,7 @@
 # ./scripts/bump-version.sh <new version>
 # eg ./scripts/bump-version.sh "0.2.0"
 #
-# Syncs the version from the root package.json (managed by changesets) to every
+# Syncs the version from the root package.json (managed by sampo) to every
 # file that hardcodes the SDK version:
 #   - wally.toml                  package manifest version
 #   - src/Shared/Version.luau     runtime SdkVersion constant

@@ -71,7 +71,7 @@ Server (a `Script` in `ServerScriptService`):
 local Players = game:GetService("Players")
 local PostHog = require(game.ReplicatedStorage:WaitForChild("PostHog"))
 
-PostHog:Init({ apiKey = "phc_YOUR_PROJECT_API_KEY" })
+PostHog:Init({ projectKey = "phc_YOUR_PROJECT_API_KEY" })
 
 Players.PlayerAdded:Connect(function(player)
     PostHog:Capture(player, "hello_world") -- attributed to a player
@@ -127,7 +127,9 @@ run the test suite with `lune run tests/runTests.luau`. See **[DEVELOPMENT.md](D
 the full guide: toolchain, tests and the coverage gate, linting and formatting, building the model
 file, and running the example in Roblox Studio.
 
-Releases are automated on tag push; see [RELEASING.md](RELEASING.md).
+Releases are semi-automated: merging a PR that contains a changeset triggers the release workflow,
+which waits for maintainer approval in the `#approvals-client-libraries` Slack channel before
+versioning, tagging and publishing. See [RELEASING.md](RELEASING.md).
 
 ## License
 

@@ -2,7 +2,7 @@
 -- In-memory event queue with batching, backoff, and the PostHog retry policy.
 --
 -- Fully dependency-injected so it can be unit-tested without any Roblox API:
---   opts.config      -> resolved config (apiKey, maxQueueSize, maxBatchSize)
+--   opts.config      -> resolved config (projectKey, maxQueueSize, maxBatchSize)
 --   opts.transport   -> { sendBatch(payload) -> { ok, statusCode, body } }
 --   opts.logger      -> { debug, info, warn, error }
 --   opts.retryPolicy -> { classify(status) -> "success"|"retry"|"retry_smaller"|"drop" }
@@ -92,7 +92,7 @@ function EventQueue:flush()
         while #self._events > 0 do
             local batch = self:_takeBatch()
             local payload = {
-                api_key = self._config.apiKey,
+                api_key = self._config.projectKey,
                 batch = batch,
                 sent_at = self._clock.iso(),
             }

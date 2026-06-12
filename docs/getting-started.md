@@ -63,8 +63,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostHog = require(ReplicatedStorage:WaitForChild("PostHog"))
 
 PostHog:Init({
-    apiKey = "phc_YOUR_PROJECT_API_KEY", -- paste your key
-    host = "https://us.i.posthog.com",   -- or https://eu.i.posthog.com
+    projectKey = "phc_YOUR_PROJECT_API_KEY", -- paste your key
+    host = "https://us.i.posthog.com",       -- or https://eu.i.posthog.com
     logLevel = "debug",
 })
 ```
@@ -145,5 +145,5 @@ No events showing up? Check, in order:
 4. **You waited for a flush.** Events batch every ~30 seconds or once 20 are queued. Call
    `PostHog:Flush()` to send immediately.
 5. **Client events are reaching the server.** The server SDK must be initialized with
-   `enableClientRelay = true` (the default). If the client logs that the relay was not found, the
+   `allowClientEvents = true` (the default). If the client logs that the relay was not found, the
    server SDK is not running.

@@ -146,8 +146,10 @@ function RelayServer:_handle(player: Player, message: any)
     elseif kind == "exception" then
         local text = if type(message.message) == "string" then message.message else ""
         local trace = if type(message.trace) == "string" then message.trace else nil
+        local errorType = if type(message.errorType) == "string" then message.errorType else nil
         local props = ExceptionBuilder.build(text, trace, {
-            handled = false,
+            handled = message.handled == true,
+            exceptionType = errorType,
             mechanismType = "roblox.client",
         })
         for key, value in self:_sanitize(message.properties) do

@@ -21,7 +21,7 @@ export type Storage = {
 
 export type Config = {
     -- Required: your PostHog project API key (starts with "phc_").
-    apiKey: string,
+    projectKey: string,
 
     -- PostHog instance URL. Defaults to the US cloud.
     host: string?,
@@ -46,8 +46,8 @@ export type Config = {
     personProfiles: PersonProfiles?,
     serverDistinctId: string?,
 
-    -- Client relay.
-    enableClientRelay: boolean?,
+    -- Client events (relayed from clients to the server over a RemoteEvent).
+    allowClientEvents: boolean?,
     clientRateLimitPerSecond: number?,
     maxClientPropertyCount: number?,
 
@@ -56,6 +56,25 @@ export type Config = {
 
     -- Advanced: override persistent storage (defaults to in-memory).
     storage: Storage?,
+
+    -- Deprecated aliases, accepted with a warning. Removed in 1.0.
+    apiKey: string?,
+    enableClientRelay: boolean?,
+}
+
+-- Who an event is about. The server resolves a subject to a distinct id:
+--   Player -> tostring(player.UserId)
+--   number -> tostring(number) (a UserId or any numeric id)
+--   string -> used as the distinct id verbatim
+-- Passing nil to a method means the server itself (config.serverDistinctId).
+export type Subject = Player | number | string
+
+-- Structured input for CaptureException. Anywhere an ExceptionInput is accepted a
+-- plain message string works too, since Luau errors are strings natively.
+export type ExceptionInput = {
+    type: string?,
+    message: string,
+    trace: string?,
 }
 
 -- A single PostHog event, ready to serialize to JSON.

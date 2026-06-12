@@ -20,7 +20,7 @@ Defaults.ERROR_DEBOUNCE_SECONDS = 1
 Defaults.PERSON_PROFILES = "identified_only"
 Defaults.LOG_LEVEL = "warn"
 Defaults.SERVER_DISTINCT_ID = "server"
-Defaults.ENABLE_CLIENT_RELAY = true
+Defaults.ALLOW_CLIENT_EVENTS = true
 Defaults.CLIENT_RATE_LIMIT_PER_SECOND = 20
 Defaults.MAX_CLIENT_PROPERTY_COUNT = 100
 
@@ -59,13 +59,19 @@ end
 -- Raises if the API key is missing or a numeric option is out of range.
 function Defaults.resolve(config)
     assert(type(config) == "table", "PostHog config must be a table")
+
+    -- `apiKey` is the pre-0.2 name for `projectKey`, accepted as an alias.
+    local projectKey = config.projectKey
+    if projectKey == nil then
+        projectKey = config.apiKey
+    end
     assert(
-        type(config.apiKey) == "string" and config.apiKey ~= "",
-        "PostHog config.apiKey is required"
+        type(projectKey) == "string" and projectKey ~= "",
+        "PostHog config.projectKey is required"
     )
 
     local resolved = {
-        apiKey = config.apiKey,
+        projectKey = projectKey,
         host = coalesce(config.host, Defaults.HOST),
         flushAt = coalesce(config.flushAt, Defaults.FLUSH_AT),
         flushIntervalSeconds = coalesce(
@@ -94,7 +100,11 @@ function Defaults.resolve(config)
         ),
         personProfiles = coalesce(config.personProfiles, Defaults.PERSON_PROFILES),
         serverDistinctId = coalesce(config.serverDistinctId, Defaults.SERVER_DISTINCT_ID),
-        enableClientRelay = coalesce(config.enableClientRelay, Defaults.ENABLE_CLIENT_RELAY),
+        -- `enableClientRelay` is the pre-0.2 name for `allowClientEvents`.
+        allowClientEvents = coalesce(
+            config.allowClientEvents,
+            coalesce(config.enableClientRelay, Defaults.ALLOW_CLIENT_EVENTS)
+        ),
         clientRateLimitPerSecond = coalesce(
             config.clientRateLimitPerSecond,
             Defaults.CLIENT_RATE_LIMIT_PER_SECOND

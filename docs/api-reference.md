@@ -18,14 +18,18 @@ Every server method that acts on a user takes a **subject** as its first argumen
 | a `string` | the string, used as-is                          |
 | `nil`      | `config.serverDistinctId` (server-scoped event) |
 
+A subject is just a distinct id, so players are not the only option: pass any string to attribute
+events to an id you control (for example an account id shared with your other platforms). See
+[Stable ids across systems](identify-and-groups.md#stable-ids-across-systems).
+
 ## Server API
 
 ### Lifecycle
 
 #### `PostHog:Init(config) -> PostHog`
 
-Initializes the SDK. Call once from a server `Script`. Raises if `config.apiKey` is missing. See
-[Configuration](configuration.md) for every option. Returns the module for chaining.
+Initializes the SDK. Call once from a server `Script`. Raises if `config.projectKey` is missing.
+See [Configuration](configuration.md) for every option. Returns the module for chaining.
 
 #### `PostHog:IsInitialized() -> boolean`
 
@@ -50,9 +54,10 @@ Captures an event. See [Capturing events](capturing-events.md).
 
 Captures a `$screen` event with a `$screen_name` property.
 
-#### `PostHog:CaptureException(subject, message, trace?, properties?)`
+#### `PostHog:CaptureException(subject, exception, trace?, properties?)`
 
-Captures a handled error as a `$exception`. See [Error tracking](error-tracking.md).
+Captures a handled error as a `$exception`. `exception` is a message string or a structured
+`{ type?, message, trace? }` table. See [Error tracking](error-tracking.md).
 
 ### Identity
 
@@ -133,9 +138,10 @@ Relays an event to the server. Reserved (`$`-prefixed) names are rejected server
 
 Relays a screen view.
 
-#### `PostHog:CaptureException(message, trace?, properties?)`
+#### `PostHog:CaptureException(exception, trace?, properties?)`
 
-Relays a handled error.
+Relays a handled error. `exception` is a message string or a structured
+`{ type?, message, trace? }` table.
 
 #### `PostHog:Flush()`
 
@@ -148,6 +154,14 @@ Always `true` on the client.
 ## Types
 
 ```lua
+type Subject = Player | number | string -- see Subjects above; nil means the server itself
+
+type ExceptionInput = {
+    type: string?,  -- defaults to "Error"
+    message: string,
+    trace: string?, -- used when no trace argument is passed
+}
+
 type FeatureFlag = {
     key: string,
     value: boolean | string, -- true/false for boolean flags, or the variant string

@@ -32,7 +32,7 @@ end
 
 function FeatureFlags:_buildBody(playerState)
     local body = {
-        api_key = self._config.apiKey,
+        api_key = self._config.projectKey,
         distinct_id = playerState.distinctId,
     }
 

@@ -15,9 +15,6 @@
 # Rokit / toolchain
 /.rokit/
 
-# Node tooling (changesets)
-/node_modules/
-
 # Editor
 .DS_Store
 .vscode/
