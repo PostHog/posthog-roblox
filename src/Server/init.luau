@@ -189,7 +189,7 @@ end
 
 local function ensureStarted(): boolean
     if not S.started then
-        warn("[PostHog] SDK not initialized. Call PostHog:Init({ apiKey = ... }) first.")
+        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectKey = ... }) first.")
         return false
     end
     return true
@@ -250,6 +250,13 @@ function PostHog:Init(userConfig: Types.Config)
     S.config = config
     S.logger = Logger.new(config.logLevel)
     S.storage = config.storage or MemoryStorage.new()
+
+    if userConfig.apiKey ~= nil and userConfig.projectKey == nil then
+        S.logger:warn("config.apiKey is deprecated; use config.projectKey")
+    end
+    if userConfig.enableClientRelay ~= nil and userConfig.allowClientEvents == nil then
+        S.logger:warn("config.enableClientRelay is deprecated; use config.allowClientEvents")
+    end
 
     local rng = Random.new()
     S.uuid = Uuid.new({
@@ -336,7 +343,7 @@ function PostHog:Init(userConfig: Types.Config)
     })
     S.autocapture:start()
 
-    if config.enableClientRelay then
+    if config.allowClientEvents then
         S.relay = RelayServer.new({
             config = config,
             logger = S.logger,

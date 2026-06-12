@@ -21,7 +21,7 @@ export type Storage = {
 
 export type Config = {
     -- Required: your PostHog project API key (starts with "phc_").
-    apiKey: string,
+    projectKey: string,
 
     -- PostHog instance URL. Defaults to the US cloud.
     host: string?,
@@ -46,8 +46,8 @@ export type Config = {
     personProfiles: PersonProfiles?,
     serverDistinctId: string?,
 
-    -- Client relay.
-    enableClientRelay: boolean?,
+    -- Client events (relayed from clients to the server over a RemoteEvent).
+    allowClientEvents: boolean?,
     clientRateLimitPerSecond: number?,
     maxClientPropertyCount: number?,
 
@@ -56,6 +56,10 @@ export type Config = {
 
     -- Advanced: override persistent storage (defaults to in-memory).
     storage: Storage?,
+
+    -- Deprecated aliases, accepted with a warning. Removed in 1.0.
+    apiKey: string?,
+    enableClientRelay: boolean?,
 }
 
 -- A single PostHog event, ready to serialize to JSON.

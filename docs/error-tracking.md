@@ -17,7 +17,7 @@ relays them to the server. No extra setup is needed.
 
 ```lua
 -- Server: errors here are captured automatically.
-PostHog:Init({ apiKey = "phc_...", captureErrors = true })
+PostHog:Init({ projectKey = "phc_...", captureErrors = true })
 ```
 
 ```lua

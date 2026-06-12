@@ -1,11 +1,11 @@
 # Configuration
 
-Pass options to `PostHog:Init` on the server. Only `apiKey` is required; everything else has a
+Pass options to `PostHog:Init` on the server. Only `projectKey` is required; everything else has a
 sensible default.
 
 ```lua
 PostHog:Init({
-    apiKey = "phc_YOUR_PROJECT_API_KEY", -- required
+    projectKey = "phc_YOUR_PROJECT_API_KEY", -- required
 
     host = "https://us.i.posthog.com",
     flushAt = 20,
@@ -24,7 +24,7 @@ PostHog:Init({
     personProfiles = "identified_only",
     serverDistinctId = "server",
 
-    enableClientRelay = true,
+    allowClientEvents = true,
     clientRateLimitPerSecond = 20,
     maxClientPropertyCount = 100,
 
@@ -33,17 +33,20 @@ PostHog:Init({
 })
 ```
 
-`Init` raises if `apiKey` is missing or empty, or if a numeric option is below its minimum. The
+`Init` raises if `projectKey` is missing or empty, or if a numeric option is below its minimum. The
 host has any trailing slash stripped automatically.
+
+The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as deprecated aliases for
+`projectKey` and `allowClientEvents`. They log a warning and will be removed in 1.0.
 
 ## Options
 
 ### Connection
 
-| Option   | Type     | Default                       | Description |
-| -------- | -------- | ----------------------------- | ----------- |
-| `apiKey` | `string` | required                       | Your PostHog project API key. Starts with `phc_`. |
-| `host`   | `string` | `https://us.i.posthog.com`     | PostHog instance URL. Use `https://eu.i.posthog.com` for EU cloud, or your self-hosted URL. |
+| Option       | Type     | Default                       | Description |
+| ------------ | -------- | ----------------------------- | ----------- |
+| `projectKey` | `string` | required                       | Your PostHog project API key. Starts with `phc_`. |
+| `host`       | `string` | `https://us.i.posthog.com`     | PostHog instance URL. Use `https://eu.i.posthog.com` for EU cloud, or your self-hosted URL. |
 
 ### Event queue
 
@@ -92,15 +95,19 @@ See [Autocapture](autocapture.md) and [Error tracking](error-tracking.md).
 
 See [Person profiles](identify-and-groups.md#person-profiles).
 
-### Client relay
+### Client events
+
+Roblox clients cannot make HTTP requests, so the client SDK relays events to the server over a
+`RemoteEvent` and the server sends them to PostHog. These options control that ingestion surface
+only; they never affect server-side capture.
 
 | Option                     | Type      | Default | Description |
 | -------------------------- | --------- | ------- | ----------- |
-| `enableClientRelay`        | `boolean` | `true`  | Create the `RemoteEvent` that lets clients relay events. |
+| `allowClientEvents`        | `boolean` | `true`  | Create the `RemoteEvent` and accept events relayed from clients. |
 | `clientRateLimitPerSecond` | `number`  | `20`    | Per-player token-bucket rate limit for relayed messages. |
 | `maxClientPropertyCount`   | `number`  | `100`   | Maximum properties accepted from a single client message. |
 
-Set `enableClientRelay = false` if you only capture on the server and want no client surface. See
+Set `allowClientEvents = false` if you only capture on the server and want no client surface. See
 [the client section of Capturing events](capturing-events.md#client).
 
 ### Diagnostics

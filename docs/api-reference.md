@@ -24,8 +24,8 @@ Every server method that acts on a user takes a **subject** as its first argumen
 
 #### `PostHog:Init(config) -> PostHog`
 
-Initializes the SDK. Call once from a server `Script`. Raises if `config.apiKey` is missing. See
-[Configuration](configuration.md) for every option. Returns the module for chaining.
+Initializes the SDK. Call once from a server `Script`. Raises if `config.projectKey` is missing.
+See [Configuration](configuration.md) for every option. Returns the module for chaining.
 
 #### `PostHog:IsInitialized() -> boolean`
 

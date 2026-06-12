@@ -86,7 +86,7 @@ PostHog:Screen("MainMenu")
 ```
 
 The client buffers calls until the relay is ready, so you can capture immediately on load. If the
-server SDK is not running (or `enableClientRelay` is off) buffered calls are dropped after a short
+server SDK is not running (or `allowClientEvents` is off) buffered calls are dropped after a short
 wait.
 
 ### What the client may send

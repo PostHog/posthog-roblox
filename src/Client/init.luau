@@ -63,8 +63,8 @@ task.spawn(function()
         disabled = true
         table.clear(buffer)
         warn(
-            "[PostHog] relay RemoteEvent not found. Initialize the server SDK with "
-                .. "enableClientRelay = true. Client events are being dropped."
+            "[PostHog] relay RemoteEvent not found. Initialize the server SDK and keep "
+                .. "allowClientEvents = true (the default). Client events are being dropped."
         )
     end
 end)

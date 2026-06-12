@@ -71,7 +71,7 @@ Server (a `Script` in `ServerScriptService`):
 local Players = game:GetService("Players")
 local PostHog = require(game.ReplicatedStorage:WaitForChild("PostHog"))
 
-PostHog:Init({ apiKey = "phc_YOUR_PROJECT_API_KEY" })
+PostHog:Init({ projectKey = "phc_YOUR_PROJECT_API_KEY" })
 
 Players.PlayerAdded:Connect(function(player)
     PostHog:Capture(player, "hello_world") -- attributed to a player
