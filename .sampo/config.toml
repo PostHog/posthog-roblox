@@ -1,0 +1,8 @@
+version = 1
+
+[git]
+default_branch = "main"
+short_tags = "posthog-roblox"
+
+[github]
+repository = "posthog/posthog-roblox"
