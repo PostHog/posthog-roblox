@@ -189,7 +189,7 @@ end
 
 local function ensureStarted(): boolean
     if not S.started then
-        warn("[PostHog] SDK not initialized. Call PostHog:Init({ apiKey = ... }) first.")
+        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectKey = ... }) first.")
         return false
     end
     return true
@@ -250,6 +250,13 @@ function PostHog:Init(userConfig: Types.Config)
     S.config = config
     S.logger = Logger.new(config.logLevel)
     S.storage = config.storage or MemoryStorage.new()
+
+    if userConfig.apiKey ~= nil and userConfig.projectKey == nil then
+        S.logger:warn("config.apiKey is deprecated; use config.projectKey")
+    end
+    if userConfig.enableClientRelay ~= nil and userConfig.allowClientEvents == nil then
+        S.logger:warn("config.enableClientRelay is deprecated; use config.allowClientEvents")
+    end
 
     local rng = Random.new()
     S.uuid = Uuid.new({
@@ -336,7 +343,7 @@ function PostHog:Init(userConfig: Types.Config)
     })
     S.autocapture:start()
 
-    if config.enableClientRelay then
+    if config.allowClientEvents then
         S.relay = RelayServer.new({
             config = config,
             logger = S.logger,
@@ -378,7 +385,7 @@ function PostHog:IsInitialized(): boolean
     return S.started
 end
 
-function PostHog:Capture(subject: any, eventName: string, properties: Types.Properties?)
+function PostHog:Capture(subject: Types.Subject?, eventName: string, properties: Types.Properties?)
     if not ensureStarted() then
         return
     end
@@ -386,7 +393,7 @@ function PostHog:Capture(subject: any, eventName: string, properties: Types.Prop
     captureWithState(state, eventName, properties, { serverScoped = serverScoped })
 end
 
-function PostHog:Screen(subject: any, screenName: string, properties: Types.Properties?)
+function PostHog:Screen(subject: Types.Subject?, screenName: string, properties: Types.Properties?)
     if not ensureStarted() then
         return
     end
@@ -397,7 +404,7 @@ function PostHog:Screen(subject: any, screenName: string, properties: Types.Prop
 end
 
 function PostHog:Identify(
-    subject: any,
+    subject: Types.Subject?,
     setProperties: Types.Properties?,
     setOnceProperties: Types.Properties?
 )
@@ -439,7 +446,7 @@ function PostHog:Identify(
     end
 end
 
-function PostHog:Alias(subject: any, alias: string)
+function PostHog:Alias(subject: Types.Subject?, alias: string)
     if not ensureStarted() then
         return
     end
@@ -450,7 +457,7 @@ function PostHog:Alias(subject: any, alias: string)
 end
 
 function PostHog:Group(
-    subject: any,
+    subject: Types.Subject?,
     groupType: string,
     groupKey: string,
     groupProperties: Types.Properties?
@@ -480,8 +487,8 @@ function PostHog:Unregister(key: string)
 end
 
 function PostHog:CaptureException(
-    subject: any,
-    message: string,
+    subject: Types.Subject?,
+    exception: string | Types.ExceptionInput,
     trace: string?,
     properties: Types.Properties?
 )
@@ -489,8 +496,10 @@ function PostHog:CaptureException(
         return
     end
     local state, serverScoped = resolveSubject(subject)
-    local props = ExceptionBuilder.build(message, trace, {
+    local message, resolvedTrace, exceptionType = ExceptionBuilder.normalize(exception, trace)
+    local props = ExceptionBuilder.build(message, resolvedTrace, {
         handled = true,
+        exceptionType = exceptionType,
         mechanismType = "generic",
     })
     if properties then
@@ -501,7 +510,7 @@ function PostHog:CaptureException(
     captureWithState(state, Defaults.EVENTS.EXCEPTION, props, { serverScoped = serverScoped })
 end
 
-function PostHog:GetFeatureFlag(subject: any, key: string): Types.FeatureFlag
+function PostHog:GetFeatureFlag(subject: Types.Subject?, key: string): Types.FeatureFlag
     if not ensureStarted() then
         return { key = key, value = false, isEnabled = false, variant = nil, payload = nil }
     end
@@ -515,7 +524,7 @@ function PostHog:GetFeatureFlag(subject: any, key: string): Types.FeatureFlag
     return result
 end
 
-function PostHog:IsFeatureEnabled(subject: any, key: string, default: boolean?): boolean
+function PostHog:IsFeatureEnabled(subject: Types.Subject?, key: string, default: boolean?): boolean
     if not ensureStarted() then
         return default == true
     end
@@ -528,7 +537,7 @@ function PostHog:IsFeatureEnabled(subject: any, key: string, default: boolean?):
     return FlagCache.isEnabled(value)
 end
 
-function PostHog:GetFeatureFlagPayload(subject: any, key: string): any?
+function PostHog:GetFeatureFlagPayload(subject: Types.Subject?, key: string): any?
     if not ensureStarted() then
         return nil
     end
@@ -540,7 +549,7 @@ function PostHog:GetFeatureFlagPayload(subject: any, key: string): any?
 end
 
 -- Reloads feature flags for a subject. Yields on the network request.
-function PostHog:ReloadFeatureFlags(subject: any): boolean
+function PostHog:ReloadFeatureFlags(subject: Types.Subject?): boolean
     if not ensureStarted() then
         return false
     end
@@ -549,7 +558,7 @@ function PostHog:ReloadFeatureFlags(subject: any): boolean
 end
 
 function PostHog:SetPersonPropertiesForFlags(
-    subject: any,
+    subject: Types.Subject?,
     properties: Types.Properties,
     reload: boolean?
 )
@@ -566,7 +575,7 @@ function PostHog:SetPersonPropertiesForFlags(
 end
 
 function PostHog:SetGroupPropertiesForFlags(
-    subject: any,
+    subject: Types.Subject?,
     groupType: string,
     properties: Types.Properties,
     reload: boolean?
@@ -596,7 +605,7 @@ function PostHog:GetSessionTeleportData(player: Player): { [string]: any }
     return {}
 end
 
-function PostHog:OptOut(subject: any)
+function PostHog:OptOut(subject: Types.Subject?)
     if not ensureStarted() then
         return
     end
@@ -604,7 +613,7 @@ function PostHog:OptOut(subject: any)
     state.optedOut = true
 end
 
-function PostHog:OptIn(subject: any)
+function PostHog:OptIn(subject: Types.Subject?)
     if not ensureStarted() then
         return
     end

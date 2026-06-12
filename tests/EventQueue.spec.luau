@@ -41,7 +41,7 @@ local function fakeTransport(responses)
 end
 
 local function makeConfig(overrides)
-    local config = { apiKey = "phc_test", maxQueueSize = 5, maxBatchSize = 2, flushAt = 3 }
+    local config = { projectKey = "phc_test", maxQueueSize = 5, maxBatchSize = 2, flushAt = 3 }
     if overrides then
         for key, value in overrides do
             config[key] = value

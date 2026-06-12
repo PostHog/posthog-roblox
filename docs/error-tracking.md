@@ -17,7 +17,7 @@ relays them to the server. No extra setup is needed.
 
 ```lua
 -- Server: errors here are captured automatically.
-PostHog:Init({ apiKey = "phc_...", captureErrors = true })
+PostHog:Init({ projectKey = "phc_...", captureErrors = true })
 ```
 
 ```lua
@@ -50,6 +50,17 @@ local ok, err = pcall(loadInventory)
 if not ok then
     PostHog:CaptureException(tostring(err), debug.traceback())
 end
+```
+
+Both sides also accept a structured error instead of a string, so you can categorize exceptions
+with your own type (it becomes `$exception_type`, which defaults to `"Error"`):
+
+```lua
+PostHog:CaptureException(player, {
+    type = "ShopError",
+    message = "purchase receipt rejected",
+    trace = debug.traceback(),
+})
 ```
 
 ## What an `$exception` event looks like
@@ -96,11 +107,12 @@ shape:
 
 The `mechanism.type` tells you where the error came from:
 
-| Source                          | `mechanism.type`        | `handled` |
-| ------------------------------- | ----------------------- | --------- |
-| automatic server error          | `roblox.ScriptContext`  | `false`   |
-| automatic client error (relayed) | `roblox.client`         | `false`   |
-| manual `CaptureException`        | `generic`               | `true`    |
+| Source                                    | `mechanism.type`       | `handled` |
+| ----------------------------------------- | ---------------------- | --------- |
+| automatic server error                    | `roblox.ScriptContext` | `false`   |
+| automatic client error (relayed)          | `roblox.client`        | `false`   |
+| manual server `CaptureException`          | `generic`              | `true`    |
+| manual client `CaptureException` (relayed) | `roblox.client`        | `true`    |
 
 ## See also
 

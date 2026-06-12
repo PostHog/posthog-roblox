@@ -9,7 +9,7 @@ Autocapture is controlled by one option:
 
 ```lua
 PostHog:Init({
-    apiKey = "phc_...",
+    projectKey = "phc_...",
     captureLifecycleEvents = true, -- default; set false to turn lifecycle events off
 })
 ```

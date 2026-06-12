@@ -56,4 +56,42 @@ h.test("ExceptionBuilder: handled exceptions use the generic mechanism", functio
     h.expectEqual(#props["$exception_list"][1].stacktrace.frames, 0)
 end)
 
+h.test("ExceptionBuilder: build honors a custom exception type", function()
+    local props = ExceptionBuilder.build("boom", nil, {
+        handled = true,
+        exceptionType = "NetworkError",
+    })
+    h.expectEqual(props["$exception_type"], "NetworkError")
+    h.expectEqual(props["$exception_list"][1].type, "NetworkError")
+end)
+
+h.test("ExceptionBuilder: normalize accepts strings, tables, and other values", function()
+    local message, trace, exceptionType = ExceptionBuilder.normalize("boom", "A:1")
+    h.expectEqual(message, "boom")
+    h.expectEqual(trace, "A:1")
+    h.expectNil(exceptionType)
+
+    message, trace, exceptionType = ExceptionBuilder.normalize({
+        type = "NetworkError",
+        message = "request failed",
+        trace = "B:2",
+    })
+    h.expectEqual(message, "request failed")
+    h.expectEqual(trace, "B:2")
+    h.expectEqual(exceptionType, "NetworkError")
+
+    -- An explicit trace argument wins over the table's trace.
+    local _, explicitTrace = ExceptionBuilder.normalize({ message = "x", trace = "B:2" }, "C:3")
+    h.expectEqual(explicitTrace, "C:3")
+
+    -- Malformed tables degrade to safe defaults.
+    message, trace, exceptionType = ExceptionBuilder.normalize({ message = 42, type = 1 })
+    h.expectEqual(message, "")
+    h.expectNil(trace)
+    h.expectNil(exceptionType)
+
+    h.expectEqual((ExceptionBuilder.normalize(nil)), "")
+    h.expectEqual((ExceptionBuilder.normalize(123)), "123")
+end)
+
 return true
