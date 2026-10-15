@@ -187,6 +187,35 @@ h.test("EventQueue: drops the oldest event when over capacity", function()
     h.expectEqual(transport.calls[1].batch[3].event, "e5")
 end)
 
+h.test("EventQueue: keeps events captured while a full queue is flushing", function()
+    local queue
+    local transport = fakeTransport({ { ok = true, statusCode = 200 } })
+    local send = transport.sendBatch
+    transport.sendBatch = function(self, payload)
+        if #self.calls == 0 then
+            for i = 1, 3 do
+                queue:enqueue(event("replacement-" .. i))
+            end
+        end
+        return send(self, payload)
+    end
+    queue = newQueue(
+        makeConfig({ maxQueueSize = 3, maxBatchSize = 3, flushAt = 999 }),
+        transport,
+        (fakeClock())
+    )
+    for i = 1, 3 do
+        queue:enqueue(event("initial-" .. i))
+    end
+
+    queue:flush()
+    h.expectEqual(#transport.calls, 2)
+    h.expectEqual(transport.calls[1].batch[1].event, "initial-1")
+    h.expectEqual(transport.calls[2].batch[1].event, "replacement-1")
+    h.expectEqual(transport.calls[2].batch[3].event, "replacement-3")
+    h.expectEqual(queue:count(), 0)
+end)
+
 h.test("EventQueue: shouldFlush reflects the flushAt threshold", function()
     local queue = newQueue(makeConfig({ flushAt = 2 }), fakeTransport({}), (fakeClock()))
     queue:enqueue(event("a"))

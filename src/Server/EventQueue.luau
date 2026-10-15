@@ -71,10 +71,18 @@ function EventQueue:_takeBatch(): { any }
     return batch
 end
 
-function EventQueue:_removeFront(count: number)
-    for _ = 1, count do
-        table.remove(self._events, 1)
+function EventQueue:_remove(batch: { any })
+    local sent = {}
+    for _, event in batch do
+        sent[event] = true
     end
+    local kept = {}
+    for _, event in self._events do
+        if not sent[event] then
+            table.insert(kept, event)
+        end
+    end
+    self._events = kept
 end
 
 -- Sends queued events in batches until the queue is empty or a retry is scheduled.
@@ -101,14 +109,14 @@ function EventQueue:flush()
             local action = self._retryPolicy.classify(result.statusCode)
 
             if action == "success" then
-                self:_removeFront(#batch)
+                self:_remove(batch)
                 self._retryCount = 0
                 self._pausedUntil = 0
             elseif action == "drop" or (action == "retry_smaller" and #batch == 1) then
                 self._logger:warn(
                     `dropping {#batch} events (non-retryable status {result.statusCode})`
                 )
-                self:_removeFront(#batch)
+                self:_remove(batch)
             elseif action == "retry_smaller" then
                 self._adjustedBatchSize = math.floor(#batch / 2)
                 self._logger:warn(
