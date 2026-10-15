@@ -14,6 +14,7 @@ Defaults.MAX_BATCH_SIZE = 50
 Defaults.PRELOAD_FEATURE_FLAGS = true
 Defaults.SEND_FEATURE_FLAG_EVENTS = true
 Defaults.SEND_DEFAULT_PERSON_PROPERTIES_FOR_FLAGS = true
+Defaults.FEATURE_FLAG_REQUEST_MAX_RETRIES = 1
 Defaults.CAPTURE_LIFECYCLE_EVENTS = true
 Defaults.CAPTURE_ERRORS = true
 Defaults.ERROR_DEBOUNCE_SECONDS = 1
@@ -55,23 +56,32 @@ local function coalesce(value: any, fallback: any): any
     return value
 end
 
+function Defaults.projectToken(config): string?
+    if type(config) ~= "table" then
+        return nil
+    end
+
+    -- `apiKey` is the pre-0.2 name for `projectToken`, accepted as an alias.
+    local projectToken = config.projectToken
+    if projectToken == nil then
+        projectToken = config.apiKey
+    end
+    if type(projectToken) ~= "string" or projectToken:match("^%s*$") then
+        return nil
+    end
+    return projectToken
+end
+
 -- Fills a user config with defaults and validates it. Returns the resolved config.
--- Raises if the API key is missing or a numeric option is out of range.
+-- Raises if the project token is missing or a numeric option is out of range.
 function Defaults.resolve(config)
     assert(type(config) == "table", "PostHog config must be a table")
 
-    -- `apiKey` is the pre-0.2 name for `projectKey`, accepted as an alias.
-    local projectKey = config.projectKey
-    if projectKey == nil then
-        projectKey = config.apiKey
-    end
-    assert(
-        type(projectKey) == "string" and projectKey ~= "",
-        "PostHog config.projectKey is required"
-    )
+    local projectToken = Defaults.projectToken(config)
+    assert(projectToken, "PostHog config.projectToken is required")
 
     local resolved = {
-        projectKey = projectKey,
+        projectToken = projectToken,
         host = coalesce(config.host, Defaults.HOST),
         flushAt = coalesce(config.flushAt, Defaults.FLUSH_AT),
         flushIntervalSeconds = coalesce(
@@ -88,6 +98,10 @@ function Defaults.resolve(config)
         sendDefaultPersonPropertiesForFlags = coalesce(
             config.sendDefaultPersonPropertiesForFlags,
             Defaults.SEND_DEFAULT_PERSON_PROPERTIES_FOR_FLAGS
+        ),
+        featureFlagRequestMaxRetries = coalesce(
+            config.featureFlagRequestMaxRetries,
+            Defaults.FEATURE_FLAG_REQUEST_MAX_RETRIES
         ),
         captureLifecycleEvents = coalesce(
             config.captureLifecycleEvents,
@@ -115,7 +129,13 @@ function Defaults.resolve(config)
         ),
         logLevel = coalesce(config.logLevel, Defaults.LOG_LEVEL),
         storage = config.storage,
+        beforeSend = config.beforeSend,
     }
+
+    assert(
+        resolved.beforeSend == nil or type(resolved.beforeSend) == "function",
+        "config.beforeSend must be a function"
+    )
 
     assert((resolved.flushAt :: number) >= 1, "config.flushAt must be at least 1")
     assert(
@@ -124,6 +144,10 @@ function Defaults.resolve(config)
     )
     assert((resolved.maxQueueSize :: number) >= 1, "config.maxQueueSize must be at least 1")
     assert((resolved.maxBatchSize :: number) >= 1, "config.maxBatchSize must be at least 1")
+    assert(
+        (resolved.featureFlagRequestMaxRetries :: number) >= 0,
+        "config.featureFlagRequestMaxRetries must be at least 0"
+    )
 
     -- Normalize the host: strip any trailing slash so we can append paths cleanly.
     resolved.host = (resolved.host :: string):gsub("/+$", "")

@@ -32,6 +32,7 @@ local FeatureFlags = require(script.FeatureFlags)
 local ExceptionBuilder = require(script.ExceptionBuilder)
 local ErrorTracking = require(script.ErrorTracking)
 local Autocapture = require(script.Autocapture)
+local BeforeSend = require(script.BeforeSend)
 local RelayServer = require(script.RelayServer)
 local MemoryStorage = require(script.Storage.MemoryStorage)
 
@@ -143,14 +144,18 @@ function captureWithState(playerState, eventName, provided, opts)
         return
     end
 
-    local event = {
+    local event = BeforeSend.run(S.config.beforeSend, {
         uuid = S.uuid:generate(),
         event = eventName,
         distinct_id = playerState.distinctId,
         timestamp = S.clock.iso(),
-        -- Sanitize so a non-encodable value can never jam the queue.
-        properties = Sanitize.clean(buildEventProperties(playerState, provided, opts)),
-    }
+        properties = buildEventProperties(playerState, provided, opts),
+    }, S.logger)
+    if not event then
+        return
+    end
+    -- Sanitize so a non-encodable value can never jam the queue.
+    event.properties = Sanitize.clean(event.properties)
 
     S.queue:enqueue(event)
     if S.queue:shouldFlush() then
@@ -189,7 +194,7 @@ end
 
 local function ensureStarted(): boolean
     if not S.started then
-        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectKey = ... }) first.")
+        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectToken = ... }) first.")
         return false
     end
     return true
@@ -245,14 +250,18 @@ function PostHog:Init(userConfig: Types.Config)
         S.logger:warn("PostHog already initialized")
         return self
     end
+    if not Defaults.projectToken(userConfig) then
+        warn("[PostHog] Init skipped: config.projectToken is not set.")
+        return self
+    end
 
     local config = Defaults.resolve(userConfig)
     S.config = config
     S.logger = Logger.new(config.logLevel)
     S.storage = config.storage or MemoryStorage.new()
 
-    if userConfig.apiKey ~= nil and userConfig.projectKey == nil then
-        S.logger:warn("config.apiKey is deprecated; use config.projectKey")
+    if userConfig.apiKey ~= nil and userConfig.projectToken == nil then
+        S.logger:warn("config.apiKey is deprecated; use config.projectToken")
     end
     if userConfig.enableClientRelay ~= nil and userConfig.allowClientEvents == nil then
         S.logger:warn("config.enableClientRelay is deprecated; use config.allowClientEvents")

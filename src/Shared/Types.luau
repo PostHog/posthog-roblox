@@ -20,8 +20,8 @@ export type Storage = {
 }
 
 export type Config = {
-    -- Required: your PostHog project API key (starts with "phc_").
-    projectKey: string,
+    -- Required: your PostHog project token (starts with "phc_").
+    projectToken: string,
 
     -- PostHog instance URL. Defaults to the US cloud.
     host: string?,
@@ -36,6 +36,7 @@ export type Config = {
     preloadFeatureFlags: boolean?,
     sendFeatureFlagEvents: boolean?,
     sendDefaultPersonPropertiesForFlags: boolean?,
+    featureFlagRequestMaxRetries: number?,
 
     -- Autocapture and error tracking.
     captureLifecycleEvents: boolean?,
@@ -56,6 +57,10 @@ export type Config = {
 
     -- Advanced: override persistent storage (defaults to in-memory).
     storage: Storage?,
+
+    -- Runs on every fully built event before it is queued. Return the event (mutated or
+    -- replaced) to send it, or nil to drop it. If it errors, the event is dropped.
+    beforeSend: ((event: Event) -> Event?)?,
 
     -- Deprecated aliases, accepted with a warning. Removed in 1.0.
     apiKey: string?,

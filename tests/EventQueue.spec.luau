@@ -41,7 +41,7 @@ local function fakeTransport(responses)
 end
 
 local function makeConfig(overrides)
-    local config = { projectKey = "phc_test", maxQueueSize = 5, maxBatchSize = 2, flushAt = 3 }
+    local config = { projectToken = "phc_test", maxQueueSize = 5, maxBatchSize = 2, flushAt = 3 }
     if overrides then
         for key, value in overrides do
             config[key] = value
@@ -138,6 +138,38 @@ h.test("EventQueue: halves the batch size on 413", function()
     h.expectEqual(#transport.calls[2].batch, 1, "batch size reduced to 1")
 end)
 
+h.test("EventQueue: halves from the size of the rejected batch on 413", function()
+    local clock, setSeconds = fakeClock()
+    local transport = fakeTransport({
+        { ok = false, statusCode = 413 },
+        { ok = true, statusCode = 200 },
+    })
+    local queue = newQueue(makeConfig({ maxBatchSize = 50, maxQueueSize = 50 }), transport, clock)
+    for i = 1, 10 do
+        queue:enqueue(event("e" .. i))
+    end
+
+    queue:flush()
+    setSeconds(1000)
+    queue:flush()
+    h.expectEqual(#transport.calls[2].batch, 5)
+end)
+
+h.test("EventQueue: drops a single event rejected with 413 and keeps flushing", function()
+    local transport = fakeTransport({
+        { ok = false, statusCode = 413 },
+        { ok = true, statusCode = 200 },
+    })
+    local queue = newQueue(makeConfig({ maxBatchSize = 1 }), transport, (fakeClock()))
+    queue:enqueue(event("huge"))
+    queue:enqueue(event("small"))
+
+    queue:flush()
+    h.expectEqual(queue:count(), 0)
+    h.expectEqual(#transport.calls, 2)
+    h.expectEqual(transport.calls[2].batch[1].event, "small")
+end)
+
 h.test("EventQueue: drops the oldest event when over capacity", function()
     local transport = fakeTransport({ { ok = true, statusCode = 200 } })
     local queue = newQueue(
@@ -153,6 +185,35 @@ h.test("EventQueue: drops the oldest event when over capacity", function()
     queue:flush()
     h.expectEqual(transport.calls[1].batch[1].event, "e3", "oldest survivors are e3..e5")
     h.expectEqual(transport.calls[1].batch[3].event, "e5")
+end)
+
+h.test("EventQueue: keeps events captured while a full queue is flushing", function()
+    local queue
+    local transport = fakeTransport({ { ok = true, statusCode = 200 } })
+    local send = transport.sendBatch
+    transport.sendBatch = function(self, payload)
+        if #self.calls == 0 then
+            for i = 1, 3 do
+                queue:enqueue(event("replacement-" .. i))
+            end
+        end
+        return send(self, payload)
+    end
+    queue = newQueue(
+        makeConfig({ maxQueueSize = 3, maxBatchSize = 3, flushAt = 999 }),
+        transport,
+        (fakeClock())
+    )
+    for i = 1, 3 do
+        queue:enqueue(event("initial-" .. i))
+    end
+
+    queue:flush()
+    h.expectEqual(#transport.calls, 2)
+    h.expectEqual(transport.calls[1].batch[1].event, "initial-1")
+    h.expectEqual(transport.calls[2].batch[1].event, "replacement-1")
+    h.expectEqual(transport.calls[2].batch[3].event, "replacement-3")
+    h.expectEqual(queue:count(), 0)
 end)
 
 h.test("EventQueue: shouldFlush reflects the flushAt threshold", function()

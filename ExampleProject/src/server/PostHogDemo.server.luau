@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostHog = require(ReplicatedStorage:WaitForChild("PostHog"))
 
 PostHog:Init({
-    projectKey = "phc_YOUR_PROJECT_API_KEY", -- replace with your project API key
+    projectToken = "phc_YOUR_PROJECT_TOKEN", -- replace with your project token
     host = "https://us.i.posthog.com", -- or https://eu.i.posthog.com
     logLevel = "debug",
 })

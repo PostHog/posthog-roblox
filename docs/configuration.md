@@ -1,11 +1,11 @@
 # Configuration
 
-Pass options to `PostHog:Init` on the server. Only `projectKey` is required; everything else has a
+Pass options to `PostHog:Init` on the server. Only `projectToken` is required; everything else has a
 sensible default.
 
 ```lua
 PostHog:Init({
-    projectKey = "phc_YOUR_PROJECT_API_KEY", -- required
+    projectToken = "phc_YOUR_PROJECT_TOKEN", -- required
 
     host = "https://us.i.posthog.com",
     flushAt = 20,
@@ -16,6 +16,7 @@ PostHog:Init({
     preloadFeatureFlags = true,
     sendFeatureFlagEvents = true,
     sendDefaultPersonPropertiesForFlags = true,
+    featureFlagRequestMaxRetries = 1,
 
     captureLifecycleEvents = true,
     captureErrors = true,
@@ -30,14 +31,15 @@ PostHog:Init({
 
     logLevel = "warn",
     storage = nil,
+    beforeSend = nil,
 })
 ```
 
-`Init` raises if `projectKey` is missing or empty, or if a numeric option is below its minimum. The
-host has any trailing slash stripped automatically.
+`Init` logs a warning and does nothing if `projectToken` is missing or blank. It raises if a numeric
+option is below its minimum. The host has any trailing slash stripped automatically.
 
 The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as deprecated aliases for
-`projectKey` and `allowClientEvents`. They log a warning and will be removed in 1.0.
+`projectToken` and `allowClientEvents`. They log a warning and will be removed in 1.0.
 
 ## Options
 
@@ -45,7 +47,7 @@ The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as depreca
 
 | Option       | Type     | Default                       | Description |
 | ------------ | -------- | ----------------------------- | ----------- |
-| `projectKey` | `string` | required                       | Your PostHog project API key. Starts with `phc_`. |
+| `projectToken` | `string` | required                       | Your PostHog project token. Starts with `phc_`. |
 | `host`       | `string` | `https://us.i.posthog.com`     | PostHog instance URL. Use `https://eu.i.posthog.com` for EU cloud, or your self-hosted URL. |
 
 ### Event queue
@@ -67,6 +69,7 @@ batch more aggressively on a busy server.
 | `preloadFeatureFlags`                 | `boolean` | `true`  | Fetch a player's flags when they join. |
 | `sendFeatureFlagEvents`               | `boolean` | `true`  | Emit `$feature_flag_called` when a flag is read. |
 | `sendDefaultPersonPropertiesForFlags` | `boolean` | `true`  | Include `$lib`, `$os`, and device in flag requests. |
+| `featureFlagRequestMaxRetries`        | `number`  | `1`     | Retries for a flag request after a network error, 502 or 504. `0` disables retries. |
 
 See [Feature flags](feature-flags.md).
 
@@ -122,6 +125,29 @@ Set `allowClientEvents = false` if you only capture on the server and want no cl
 | `logLevel` | `LogLevel` | `"warn"` | One of `"debug"`, `"info"`, `"warn"`, `"error"`, `"none"`. |
 
 Use `"debug"` while integrating to see the SDK's lifecycle and HTTP activity in the output.
+
+### Filtering events
+
+| Option       | Type                         | Default | Description |
+| ------------ | ---------------------------- | ------- | ----------- |
+| `beforeSend` | `(event: Event) -> Event?`   | `nil`   | Modify or drop every event before it is queued. |
+
+`beforeSend` runs on the fully built event (properties, `$session_id`, `$groups` and SDK context
+included), for server, client-relayed and autocaptured events alike. Return the event to send it,
+or `nil` to drop it. If the callback errors, the SDK logs the error and drops the event.
+
+```lua
+PostHog:Init({
+    projectToken = "phc_YOUR_PROJECT_TOKEN",
+    beforeSend = function(event)
+        if event.event == "player_idle" then
+            return nil
+        end
+        event.properties.email = nil
+        return event
+    end,
+})
+```
 
 ### Storage (advanced)
 

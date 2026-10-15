@@ -2,7 +2,7 @@
 -- In-memory event queue with batching, backoff, and the PostHog retry policy.
 --
 -- Fully dependency-injected so it can be unit-tested without any Roblox API:
---   opts.config      -> resolved config (projectKey, maxQueueSize, maxBatchSize)
+--   opts.config      -> resolved config (projectToken, maxQueueSize, maxBatchSize)
 --   opts.transport   -> { sendBatch(payload) -> { ok, statusCode, body } }
 --   opts.logger      -> { debug, info, warn, error }
 --   opts.retryPolicy -> { classify(status) -> "success"|"retry"|"retry_smaller"|"drop" }
@@ -71,10 +71,18 @@ function EventQueue:_takeBatch(): { any }
     return batch
 end
 
-function EventQueue:_removeFront(count: number)
-    for _ = 1, count do
-        table.remove(self._events, 1)
+function EventQueue:_remove(batch: { any })
+    local sent = {}
+    for _, event in batch do
+        sent[event] = true
     end
+    local kept = {}
+    for _, event in self._events do
+        if not sent[event] then
+            table.insert(kept, event)
+        end
+    end
+    self._events = kept
 end
 
 -- Sends queued events in batches until the queue is empty or a retry is scheduled.
@@ -92,7 +100,7 @@ function EventQueue:flush()
         while #self._events > 0 do
             local batch = self:_takeBatch()
             local payload = {
-                api_key = self._config.projectKey,
+                api_key = self._config.projectToken,
                 batch = batch,
                 sent_at = self._clock.iso(),
             }
@@ -101,16 +109,16 @@ function EventQueue:flush()
             local action = self._retryPolicy.classify(result.statusCode)
 
             if action == "success" then
-                self:_removeFront(#batch)
+                self:_remove(batch)
                 self._retryCount = 0
                 self._pausedUntil = 0
-            elseif action == "drop" then
+            elseif action == "drop" or (action == "retry_smaller" and #batch == 1) then
                 self._logger:warn(
                     `dropping {#batch} events (non-retryable status {result.statusCode})`
                 )
-                self:_removeFront(#batch)
+                self:_remove(batch)
             elseif action == "retry_smaller" then
-                self._adjustedBatchSize = math.max(1, math.floor(self._adjustedBatchSize / 2))
+                self._adjustedBatchSize = math.floor(#batch / 2)
                 self._logger:warn(
                     `payload too large, reducing batch size to {self._adjustedBatchSize}`
                 )
