@@ -16,6 +16,7 @@ PostHog:Init({
     preloadFeatureFlags = true,
     sendFeatureFlagEvents = true,
     sendDefaultPersonPropertiesForFlags = true,
+    featureFlagRequestMaxRetries = 1,
 
     captureLifecycleEvents = true,
     captureErrors = true,
@@ -68,6 +69,7 @@ batch more aggressively on a busy server.
 | `preloadFeatureFlags`                 | `boolean` | `true`  | Fetch a player's flags when they join. |
 | `sendFeatureFlagEvents`               | `boolean` | `true`  | Emit `$feature_flag_called` when a flag is read. |
 | `sendDefaultPersonPropertiesForFlags` | `boolean` | `true`  | Include `$lib`, `$os`, and device in flag requests. |
+| `featureFlagRequestMaxRetries`        | `number`  | `1`     | Retries for a flag request after a network error, 502 or 504. `0` disables retries. |
 
 See [Feature flags](feature-flags.md).
 

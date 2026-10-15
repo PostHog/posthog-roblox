@@ -14,6 +14,7 @@ Defaults.MAX_BATCH_SIZE = 50
 Defaults.PRELOAD_FEATURE_FLAGS = true
 Defaults.SEND_FEATURE_FLAG_EVENTS = true
 Defaults.SEND_DEFAULT_PERSON_PROPERTIES_FOR_FLAGS = true
+Defaults.FEATURE_FLAG_REQUEST_MAX_RETRIES = 1
 Defaults.CAPTURE_LIFECYCLE_EVENTS = true
 Defaults.CAPTURE_ERRORS = true
 Defaults.ERROR_DEBOUNCE_SECONDS = 1
@@ -98,6 +99,10 @@ function Defaults.resolve(config)
             config.sendDefaultPersonPropertiesForFlags,
             Defaults.SEND_DEFAULT_PERSON_PROPERTIES_FOR_FLAGS
         ),
+        featureFlagRequestMaxRetries = coalesce(
+            config.featureFlagRequestMaxRetries,
+            Defaults.FEATURE_FLAG_REQUEST_MAX_RETRIES
+        ),
         captureLifecycleEvents = coalesce(
             config.captureLifecycleEvents,
             Defaults.CAPTURE_LIFECYCLE_EVENTS
@@ -139,6 +144,10 @@ function Defaults.resolve(config)
     )
     assert((resolved.maxQueueSize :: number) >= 1, "config.maxQueueSize must be at least 1")
     assert((resolved.maxBatchSize :: number) >= 1, "config.maxBatchSize must be at least 1")
+    assert(
+        (resolved.featureFlagRequestMaxRetries :: number) >= 0,
+        "config.featureFlagRequestMaxRetries must be at least 0"
+    )
 
     -- Normalize the host: strip any trailing slash so we can append paths cleanly.
     resolved.host = (resolved.host :: string):gsub("/+$", "")

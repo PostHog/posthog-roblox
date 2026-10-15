@@ -10,6 +10,8 @@
 
 export type Action = "success" | "retry" | "retry_smaller" | "drop"
 
+local FLAGS_INITIAL_RETRY_DELAY_SECONDS = 0.3
+
 local RetryPolicy = {}
 
 function RetryPolicy.classify(statusCode: number): Action
@@ -39,6 +41,14 @@ function RetryPolicy.classify(statusCode: number): Action
 
     -- Unknown / unexpected: retry conservatively.
     return "retry"
+end
+
+function RetryPolicy.shouldRetryFlags(statusCode: number): boolean
+    return statusCode == 0 or statusCode == 502 or statusCode == 504
+end
+
+function RetryPolicy.flagsRetryDelay(failedAttempt: number): number
+    return FLAGS_INITIAL_RETRY_DELAY_SECONDS * 2 ^ (failedAttempt - 1)
 end
 
 return RetryPolicy

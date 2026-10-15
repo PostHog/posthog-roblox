@@ -6,6 +6,7 @@
 local FlagCache = require(script.Parent.FlagCache)
 local Defaults = require(script.Parent.Parent.Shared.Defaults)
 local Version = require(script.Parent.Parent.Shared.Version)
+local RetryPolicy = require(script.Parent.Parent.Shared.RetryPolicy)
 
 local FeatureFlags = {}
 FeatureFlags.__index = FeatureFlags
@@ -77,7 +78,24 @@ end
 -- Fetches flags for a subject. Yields on the network request. Returns success.
 function FeatureFlags:reload(playerState): boolean
     local store = self:_ensureStore(playerState)
-    local result = self._transport:fetchFlags(self:_buildBody(playerState))
+    local body = self:_buildBody(playerState)
+    local maxAttempts = math.floor(self._config.featureFlagRequestMaxRetries) + 1
+
+    local result
+    for attempt = 1, maxAttempts do
+        result = self._transport:fetchFlags(body)
+        if
+            result.ok
+            or attempt == maxAttempts
+            or not RetryPolicy.shouldRetryFlags(result.statusCode)
+        then
+            break
+        end
+        self._logger:debug(
+            `feature flags fetch failed for {playerState.distinctId} (status {result.statusCode}), retrying`
+        )
+        task.wait(RetryPolicy.flagsRetryDelay(attempt))
+    end
 
     if result.ok and type(result.body) == "table" then
         FlagCache.applyResponse(store, result.body)

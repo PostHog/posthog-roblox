@@ -36,6 +36,7 @@ export type Config = {
     preloadFeatureFlags: boolean?,
     sendFeatureFlagEvents: boolean?,
     sendDefaultPersonPropertiesForFlags: boolean?,
+    featureFlagRequestMaxRetries: number?,
 
     -- Autocapture and error tracking.
     captureLifecycleEvents: boolean?,

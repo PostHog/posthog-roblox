@@ -76,6 +76,18 @@ h.test("Defaults: applies defaults for omitted options", function()
     h.expectTrue(r.preloadFeatureFlags)
     h.expectTrue(r.allowClientEvents)
     h.expectTrue(r.captureErrors)
+    h.expectEqual(r.featureFlagRequestMaxRetries, 1)
+end)
+
+h.test("Defaults: allows disabling feature flag request retries", function()
+    local r = Defaults.resolve({ projectToken = "phc_x", featureFlagRequestMaxRetries = 0 })
+    h.expectEqual(r.featureFlagRequestMaxRetries, 0)
+end)
+
+h.test("Defaults: rejects negative feature flag request retries", function()
+    h.expectFalse(pcall(function()
+        return Defaults.resolve({ projectToken = "phc_x", featureFlagRequestMaxRetries = -1 })
+    end))
 end)
 
 h.test("Defaults: respects explicit overrides", function()
