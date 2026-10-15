@@ -124,7 +124,13 @@ function Defaults.resolve(config)
         ),
         logLevel = coalesce(config.logLevel, Defaults.LOG_LEVEL),
         storage = config.storage,
+        beforeSend = config.beforeSend,
     }
+
+    assert(
+        resolved.beforeSend == nil or type(resolved.beforeSend) == "function",
+        "config.beforeSend must be a function"
+    )
 
     assert((resolved.flushAt :: number) >= 1, "config.flushAt must be at least 1")
     assert(

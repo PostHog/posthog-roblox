@@ -110,4 +110,17 @@ h.test("Defaults: rejects out-of-range numeric options", function()
     end
 end)
 
+h.test("Defaults: keeps a beforeSend function", function()
+    local hook = function(event)
+        return event
+    end
+    h.expect(Defaults.resolve({ projectToken = "phc_x", beforeSend = hook }).beforeSend == hook)
+end)
+
+h.test("Defaults: rejects a non-function beforeSend", function()
+    h.expectFalse(pcall(function()
+        return Defaults.resolve({ projectToken = "phc_x", beforeSend = "nope" })
+    end))
+end)
+
 return true

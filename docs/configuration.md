@@ -30,6 +30,7 @@ PostHog:Init({
 
     logLevel = "warn",
     storage = nil,
+    beforeSend = nil,
 })
 ```
 
@@ -122,6 +123,29 @@ Set `allowClientEvents = false` if you only capture on the server and want no cl
 | `logLevel` | `LogLevel` | `"warn"` | One of `"debug"`, `"info"`, `"warn"`, `"error"`, `"none"`. |
 
 Use `"debug"` while integrating to see the SDK's lifecycle and HTTP activity in the output.
+
+### Filtering events
+
+| Option       | Type                         | Default | Description |
+| ------------ | ---------------------------- | ------- | ----------- |
+| `beforeSend` | `(event: Event) -> Event?`   | `nil`   | Modify or drop every event before it is queued. |
+
+`beforeSend` runs on the fully built event (properties, `$session_id`, `$groups` and SDK context
+included), for server, client-relayed and autocaptured events alike. Return the event to send it,
+or `nil` to drop it. If the callback errors, the SDK logs the error and drops the event.
+
+```lua
+PostHog:Init({
+    projectToken = "phc_YOUR_PROJECT_TOKEN",
+    beforeSend = function(event)
+        if event.event == "player_idle" then
+            return nil
+        end
+        event.properties.email = nil
+        return event
+    end,
+})
+```
 
 ### Storage (advanced)
 

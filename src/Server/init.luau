@@ -32,6 +32,7 @@ local FeatureFlags = require(script.FeatureFlags)
 local ExceptionBuilder = require(script.ExceptionBuilder)
 local ErrorTracking = require(script.ErrorTracking)
 local Autocapture = require(script.Autocapture)
+local BeforeSend = require(script.BeforeSend)
 local RelayServer = require(script.RelayServer)
 local MemoryStorage = require(script.Storage.MemoryStorage)
 
@@ -143,14 +144,18 @@ function captureWithState(playerState, eventName, provided, opts)
         return
     end
 
-    local event = {
+    local event = BeforeSend.run(S.config.beforeSend, {
         uuid = S.uuid:generate(),
         event = eventName,
         distinct_id = playerState.distinctId,
         timestamp = S.clock.iso(),
-        -- Sanitize so a non-encodable value can never jam the queue.
-        properties = Sanitize.clean(buildEventProperties(playerState, provided, opts)),
-    }
+        properties = buildEventProperties(playerState, provided, opts),
+    }, S.logger)
+    if not event then
+        return
+    end
+    -- Sanitize so a non-encodable value can never jam the queue.
+    event.properties = Sanitize.clean(event.properties)
 
     S.queue:enqueue(event)
     if S.queue:shouldFlush() then

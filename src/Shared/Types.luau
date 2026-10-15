@@ -57,6 +57,10 @@ export type Config = {
     -- Advanced: override persistent storage (defaults to in-memory).
     storage: Storage?,
 
+    -- Runs on every fully built event before it is queued. Return the event (mutated or
+    -- replaced) to send it, or nil to drop it. If it errors, the event is dropped.
+    beforeSend: ((event: Event) -> Event?)?,
+
     -- Deprecated aliases, accepted with a warning. Removed in 1.0.
     apiKey: string?,
     enableClientRelay: boolean?,
