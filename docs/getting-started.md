@@ -8,7 +8,7 @@ sending data. For a deeper look at any feature, see the guides linked at the end
 
 You need two things:
 
-1. A **PostHog project API key** (starts with `phc_`). Find it in PostHog under
+1. A **PostHog project token** (starts with `phc_`). Find it in PostHog under
    **Settings -> Project**. Note your host while you are there: `https://us.i.posthog.com` (US) or
    `https://eu.i.posthog.com` (EU).
 2. A **Roblox place** you can edit in Studio.
@@ -63,7 +63,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local PostHog = require(ReplicatedStorage:WaitForChild("PostHog"))
 
 PostHog:Init({
-    projectKey = "phc_YOUR_PROJECT_API_KEY", -- paste your key
+    projectToken = "phc_YOUR_PROJECT_TOKEN", -- paste your token
     host = "https://us.i.posthog.com",       -- or https://eu.i.posthog.com
     logLevel = "debug",
 })
@@ -95,7 +95,7 @@ If nothing shows up, jump to [Troubleshooting](#troubleshooting).
 ## 6. Capture from the client
 
 You can also capture from a `LocalScript` (for example in `StarterPlayerScripts`). Client calls are
-relayed to the server, which attributes them to the firing player. There is no API key on the
+relayed to the server, which attributes them to the firing player. There is no project token on the
 client and no subject argument:
 
 ```lua

@@ -56,22 +56,22 @@ local function coalesce(value: any, fallback: any): any
 end
 
 -- Fills a user config with defaults and validates it. Returns the resolved config.
--- Raises if the API key is missing or a numeric option is out of range.
+-- Raises if the project token is missing or a numeric option is out of range.
 function Defaults.resolve(config)
     assert(type(config) == "table", "PostHog config must be a table")
 
-    -- `apiKey` is the pre-0.2 name for `projectKey`, accepted as an alias.
-    local projectKey = config.projectKey
-    if projectKey == nil then
-        projectKey = config.apiKey
+    -- `apiKey` is the pre-0.2 name for `projectToken`, accepted as an alias.
+    local projectToken = config.projectToken
+    if projectToken == nil then
+        projectToken = config.apiKey
     end
     assert(
-        type(projectKey) == "string" and projectKey ~= "",
-        "PostHog config.projectKey is required"
+        type(projectToken) == "string" and projectToken ~= "",
+        "PostHog config.projectToken is required"
     )
 
     local resolved = {
-        projectKey = projectKey,
+        projectToken = projectToken,
         host = coalesce(config.host, Defaults.HOST),
         flushAt = coalesce(config.flushAt, Defaults.FLUSH_AT),
         flushIntervalSeconds = coalesce(

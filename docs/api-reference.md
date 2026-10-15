@@ -28,7 +28,7 @@ events to an id you control (for example an account id shared with your other pl
 
 #### `PostHog:Init(config) -> PostHog`
 
-Initializes the SDK. Call once from a server `Script`. Raises if `config.projectKey` is missing.
+Initializes the SDK. Call once from a server `Script`. Raises if `config.projectToken` is missing.
 See [Configuration](configuration.md) for every option. Returns the module for chaining.
 
 #### `PostHog:IsInitialized() -> boolean`

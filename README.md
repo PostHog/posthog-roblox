@@ -17,7 +17,7 @@ evaluate feature flags, and track errors from your Roblox experiences.
 ## Requirements
 
 - HTTP requests enabled for your experience (Game Settings -> Security -> **Allow HTTP Requests**).
-- A PostHog project API key (starts with `phc_`).
+- A PostHog project token (starts with `phc_`).
 
 ## Installation
 
@@ -71,7 +71,7 @@ Server (a `Script` in `ServerScriptService`):
 local Players = game:GetService("Players")
 local PostHog = require(game.ReplicatedStorage:WaitForChild("PostHog"))
 
-PostHog:Init({ projectKey = "phc_YOUR_PROJECT_API_KEY" })
+PostHog:Init({ projectToken = "phc_YOUR_PROJECT_TOKEN" })
 
 Players.PlayerAdded:Connect(function(player)
     PostHog:Capture(player, "hello_world") -- attributed to a player
@@ -116,7 +116,7 @@ Client (LocalScript)                 Server (Script)
 ```
 
 The server owns the event queue, identity, feature flags, error tracking, and all HTTP. The client
-never holds the API key and is treated as untrusted: relayed messages are validated, rate-limited,
+never holds the project token and is treated as untrusted: relayed messages are validated, rate-limited,
 and always attributed to the firing player. See
 [Capturing events](docs/capturing-events.md#client) for the relay's security model.
 

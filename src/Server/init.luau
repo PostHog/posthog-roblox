@@ -189,7 +189,7 @@ end
 
 local function ensureStarted(): boolean
     if not S.started then
-        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectKey = ... }) first.")
+        warn("[PostHog] SDK not initialized. Call PostHog:Init({ projectToken = ... }) first.")
         return false
     end
     return true
@@ -251,8 +251,8 @@ function PostHog:Init(userConfig: Types.Config)
     S.logger = Logger.new(config.logLevel)
     S.storage = config.storage or MemoryStorage.new()
 
-    if userConfig.apiKey ~= nil and userConfig.projectKey == nil then
-        S.logger:warn("config.apiKey is deprecated; use config.projectKey")
+    if userConfig.apiKey ~= nil and userConfig.projectToken == nil then
+        S.logger:warn("config.apiKey is deprecated; use config.projectToken")
     end
     if userConfig.enableClientRelay ~= nil and userConfig.allowClientEvents == nil then
         S.logger:warn("config.enableClientRelay is deprecated; use config.allowClientEvents")

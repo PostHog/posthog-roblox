@@ -1,11 +1,11 @@
 # Configuration
 
-Pass options to `PostHog:Init` on the server. Only `projectKey` is required; everything else has a
+Pass options to `PostHog:Init` on the server. Only `projectToken` is required; everything else has a
 sensible default.
 
 ```lua
 PostHog:Init({
-    projectKey = "phc_YOUR_PROJECT_API_KEY", -- required
+    projectToken = "phc_YOUR_PROJECT_TOKEN", -- required
 
     host = "https://us.i.posthog.com",
     flushAt = 20,
@@ -33,11 +33,11 @@ PostHog:Init({
 })
 ```
 
-`Init` raises if `projectKey` is missing or empty, or if a numeric option is below its minimum. The
+`Init` raises if `projectToken` is missing or empty, or if a numeric option is below its minimum. The
 host has any trailing slash stripped automatically.
 
 The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as deprecated aliases for
-`projectKey` and `allowClientEvents`. They log a warning and will be removed in 1.0.
+`projectToken` and `allowClientEvents`. They log a warning and will be removed in 1.0.
 
 ## Options
 
@@ -45,7 +45,7 @@ The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as depreca
 
 | Option       | Type     | Default                       | Description |
 | ------------ | -------- | ----------------------------- | ----------- |
-| `projectKey` | `string` | required                       | Your PostHog project API key. Starts with `phc_`. |
+| `projectToken` | `string` | required                       | Your PostHog project token. Starts with `phc_`. |
 | `host`       | `string` | `https://us.i.posthog.com`     | PostHog instance URL. Use `https://eu.i.posthog.com` for EU cloud, or your self-hosted URL. |
 
 ### Event queue

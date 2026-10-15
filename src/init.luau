@@ -6,7 +6,7 @@
 --
 --   local PostHog = require(ReplicatedStorage.PostHog)
 --
--- On the server call `PostHog:Init({ projectKey = "phc_..." })` once from a Script.
+-- On the server call `PostHog:Init({ projectToken = "phc_..." })` once from a Script.
 
 local RunService = game:GetService("RunService")
 

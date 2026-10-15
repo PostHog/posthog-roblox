@@ -20,8 +20,8 @@ export type Storage = {
 }
 
 export type Config = {
-    -- Required: your PostHog project API key (starts with "phc_").
-    projectKey: string,
+    -- Required: your PostHog project token (starts with "phc_").
+    projectToken: string,
 
     -- PostHog instance URL. Defaults to the US cloud.
     host: string?,

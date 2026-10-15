@@ -12,7 +12,7 @@ For cutting a release, see [RELEASING.md](RELEASING.md).
 - **[Roblox Studio](https://create.roblox.com/)** — only needed to run the SDK at runtime. The unit
   tests run without it.
 - **A PostHog project** — only needed for end-to-end verification (capturing real events). Grab the
-  project API key (starts with `phc_`) from your project settings.
+  project token (starts with `phc_`) from your project settings.
 - **Git**.
 
 ## Getting set up
@@ -165,7 +165,7 @@ rojo serve
 server and client scripts, so edits to `src/` are reflected immediately. To run it:
 
 1. Open a new baseplate in Studio and connect the Rojo plugin.
-2. Set your API key in
+2. Set your project token in
    [`ExampleProject/src/server/PostHogDemo.server.luau`](ExampleProject/src/server/PostHogDemo.server.luau).
 3. Enable HTTP: **Game Settings -> Security -> Allow HTTP Requests** (and **Allow Studio Access to API
    Services** so DataStores/HTTP work in Studio).
