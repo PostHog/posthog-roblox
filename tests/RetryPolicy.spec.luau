@@ -2,28 +2,26 @@
 local h = require("./helper")
 local RetryPolicy = require("../src/Shared/RetryPolicy")
 
-h.test("RetryPolicy: 2xx is success", function()
-    h.expectEqual(RetryPolicy.classify(200), "success")
-    h.expectEqual(RetryPolicy.classify(204), "success")
-end)
-
-h.test("RetryPolicy: network error and 3xx/5xx retry", function()
-    h.expectEqual(RetryPolicy.classify(0), "retry")
-    h.expectEqual(RetryPolicy.classify(301), "retry")
-    h.expectEqual(RetryPolicy.classify(500), "retry")
-    h.expectEqual(RetryPolicy.classify(503), "retry")
-end)
-
-h.test("RetryPolicy: 413 retries with a smaller batch", function()
-    h.expectEqual(RetryPolicy.classify(413), "retry_smaller")
-end)
-
-h.test("RetryPolicy: other 4xx are dropped", function()
-    h.expectEqual(RetryPolicy.classify(400), "drop")
-    h.expectEqual(RetryPolicy.classify(401), "drop")
-    h.expectEqual(RetryPolicy.classify(404), "drop")
-    h.expectEqual(RetryPolicy.classify(429), "drop")
-end)
+for _, case in
+    {
+        { status = 200, expected = "success" },
+        { status = 204, expected = "success" },
+        { status = 0, expected = "retry" },
+        { status = 301, expected = "retry" },
+        { status = 408, expected = "retry" },
+        { status = 429, expected = "retry" },
+        { status = 500, expected = "retry" },
+        { status = 503, expected = "retry" },
+        { status = 413, expected = "retry_smaller" },
+        { status = 400, expected = "drop" },
+        { status = 401, expected = "drop" },
+        { status = 404, expected = "drop" },
+    }
+do
+    h.test(`RetryPolicy: classify({case.status}) is {case.expected}`, function()
+        h.expectEqual(RetryPolicy.classify(case.status), case.expected)
+    end)
+end
 
 for _, case in
     {

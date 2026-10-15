@@ -4,7 +4,7 @@
 --
 -- Actions:
 --   "success"       -> 2xx: events delivered, delete them
---   "retry"         -> network error (0), 3xx, or 5xx: keep events, back off and retry
+--   "retry"         -> network error (0), 3xx, 408, 429 or 5xx: keep events, back off and retry
 --   "retry_smaller" -> 413 (payload too large): halve the batch size, then retry
 --   "drop"          -> other 4xx: non-retryable, delete the events
 
@@ -24,6 +24,10 @@ function RetryPolicy.classify(statusCode: number): Action
     end
 
     if statusCode >= 300 and statusCode < 400 then
+        return "retry"
+    end
+
+    if statusCode == 408 or statusCode == 429 then
         return "retry"
     end
 
