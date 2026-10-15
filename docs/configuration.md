@@ -33,8 +33,8 @@ PostHog:Init({
 })
 ```
 
-`Init` raises if `projectToken` is missing or empty, or if a numeric option is below its minimum. The
-host has any trailing slash stripped automatically.
+`Init` logs a warning and does nothing if `projectToken` is missing or blank. It raises if a numeric
+option is below its minimum. The host has any trailing slash stripped automatically.
 
 The pre-0.2 names `apiKey` and `enableClientRelay` are still accepted as deprecated aliases for
 `projectToken` and `allowClientEvents`. They log a warning and will be removed in 1.0.

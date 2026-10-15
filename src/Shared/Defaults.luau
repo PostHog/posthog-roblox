@@ -55,20 +55,29 @@ local function coalesce(value: any, fallback: any): any
     return value
 end
 
--- Fills a user config with defaults and validates it. Returns the resolved config.
--- Raises if the project token is missing or a numeric option is out of range.
-function Defaults.resolve(config)
-    assert(type(config) == "table", "PostHog config must be a table")
+function Defaults.projectToken(config): string?
+    if type(config) ~= "table" then
+        return nil
+    end
 
     -- `apiKey` is the pre-0.2 name for `projectToken`, accepted as an alias.
     local projectToken = config.projectToken
     if projectToken == nil then
         projectToken = config.apiKey
     end
-    assert(
-        type(projectToken) == "string" and projectToken ~= "",
-        "PostHog config.projectToken is required"
-    )
+    if type(projectToken) ~= "string" or projectToken:match("^%s*$") then
+        return nil
+    end
+    return projectToken
+end
+
+-- Fills a user config with defaults and validates it. Returns the resolved config.
+-- Raises if the project token is missing or a numeric option is out of range.
+function Defaults.resolve(config)
+    assert(type(config) == "table", "PostHog config must be a table")
+
+    local projectToken = Defaults.projectToken(config)
+    assert(projectToken, "PostHog config.projectToken is required")
 
     local resolved = {
         projectToken = projectToken,

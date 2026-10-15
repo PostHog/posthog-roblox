@@ -245,6 +245,10 @@ function PostHog:Init(userConfig: Types.Config)
         S.logger:warn("PostHog already initialized")
         return self
     end
+    if not Defaults.projectToken(userConfig) then
+        warn("[PostHog] Init skipped: config.projectToken is not set.")
+        return self
+    end
 
     local config = Defaults.resolve(userConfig)
     S.config = config

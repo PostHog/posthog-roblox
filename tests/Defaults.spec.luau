@@ -2,17 +2,43 @@
 local h = require("./helper")
 local Defaults = require("../src/Shared/Defaults")
 
-h.test("Defaults: requires a non-empty projectToken", function()
-    h.expectFalse(pcall(function()
-        return Defaults.resolve({})
-    end))
-    h.expectFalse(pcall(function()
-        return Defaults.resolve({ projectToken = "" })
-    end))
-    h.expectFalse(pcall(function()
-        return Defaults.resolve("not a table")
-    end))
-end)
+for _, case in
+    {
+        { name = "a nil config", config = nil },
+        { name = "a non-table config", config = "not a table" },
+        { name = "a missing token", config = {} },
+        { name = "an empty token", config = { projectToken = "" } },
+        { name = "a whitespace token", config = { projectToken = "  \t" } },
+        { name = "a non-string token", config = { projectToken = 123 } },
+        { name = "a blank apiKey alias", config = { apiKey = " " } },
+    }
+do
+    h.test(`Defaults: projectToken is nil for {case.name}`, function()
+        h.expectNil(Defaults.projectToken(case.config))
+    end)
+
+    h.test(`Defaults: resolve rejects {case.name}`, function()
+        h.expectFalse(pcall(function()
+            return Defaults.resolve(case.config)
+        end))
+    end)
+end
+
+for _, case in
+    {
+        { name = "projectToken", config = { projectToken = "phc_new" }, expected = "phc_new" },
+        { name = "apiKey alias", config = { apiKey = "phc_legacy" }, expected = "phc_legacy" },
+        {
+            name = "projectToken over apiKey",
+            config = { projectToken = "phc_new", apiKey = "phc_legacy" },
+            expected = "phc_new",
+        },
+    }
+do
+    h.test(`Defaults: projectToken reads {case.name}`, function()
+        h.expectEqual(Defaults.projectToken(case.config), case.expected)
+    end)
+end
 
 h.test("Defaults: accepts apiKey as a deprecated alias for projectToken", function()
     local r = Defaults.resolve({ apiKey = "phc_legacy" })
