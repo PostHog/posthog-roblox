@@ -138,6 +138,38 @@ h.test("EventQueue: halves the batch size on 413", function()
     h.expectEqual(#transport.calls[2].batch, 1, "batch size reduced to 1")
 end)
 
+h.test("EventQueue: halves from the size of the rejected batch on 413", function()
+    local clock, setSeconds = fakeClock()
+    local transport = fakeTransport({
+        { ok = false, statusCode = 413 },
+        { ok = true, statusCode = 200 },
+    })
+    local queue = newQueue(makeConfig({ maxBatchSize = 50, maxQueueSize = 50 }), transport, clock)
+    for i = 1, 10 do
+        queue:enqueue(event("e" .. i))
+    end
+
+    queue:flush()
+    setSeconds(1000)
+    queue:flush()
+    h.expectEqual(#transport.calls[2].batch, 5)
+end)
+
+h.test("EventQueue: drops a single event rejected with 413 and keeps flushing", function()
+    local transport = fakeTransport({
+        { ok = false, statusCode = 413 },
+        { ok = true, statusCode = 200 },
+    })
+    local queue = newQueue(makeConfig({ maxBatchSize = 1 }), transport, (fakeClock()))
+    queue:enqueue(event("huge"))
+    queue:enqueue(event("small"))
+
+    queue:flush()
+    h.expectEqual(queue:count(), 0)
+    h.expectEqual(#transport.calls, 2)
+    h.expectEqual(transport.calls[2].batch[1].event, "small")
+end)
+
 h.test("EventQueue: drops the oldest event when over capacity", function()
     local transport = fakeTransport({ { ok = true, statusCode = 200 } })
     local queue = newQueue(

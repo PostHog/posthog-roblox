@@ -104,13 +104,13 @@ function EventQueue:flush()
                 self:_removeFront(#batch)
                 self._retryCount = 0
                 self._pausedUntil = 0
-            elseif action == "drop" then
+            elseif action == "drop" or (action == "retry_smaller" and #batch == 1) then
                 self._logger:warn(
                     `dropping {#batch} events (non-retryable status {result.statusCode})`
                 )
                 self:_removeFront(#batch)
             elseif action == "retry_smaller" then
-                self._adjustedBatchSize = math.max(1, math.floor(self._adjustedBatchSize / 2))
+                self._adjustedBatchSize = math.floor(#batch / 2)
                 self._logger:warn(
                     `payload too large, reducing batch size to {self._adjustedBatchSize}`
                 )
