@@ -73,6 +73,10 @@ Call it when something that affects targeting changes mid-session (the player le
 guild, changed a setting), or on a timer if you roll flags out gradually and want long sessions to
 pick up changes.
 
+After an error-free reload, the cache holds exactly the flags PostHog returned, so a flag you disable
+in PostHog falls back to your `default`. If PostHog reports errors while evaluating flags, any flag it
+couldn't evaluate keeps its last value.
+
 ## Targeting with properties
 
 Flags can target players by person or group properties. Set the properties the SDK sends with the
