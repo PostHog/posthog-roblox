@@ -9,8 +9,11 @@
 --     requestId = string?,
 --     evaluatedAt = number? }
 --
--- Resolution: v4 (`flags`) takes priority over v3 (`featureFlags`). A non-empty
--- `quotaLimited` array wipes all cached flags.
+-- Resolution: v4 (`flags`) takes priority over v3 (`featureFlags`). An error-free
+-- response replaces all cached flags, so a flag missing from it reads as unset. A
+-- response with `errorsWhileComputingFlags` is merged instead, skipping v4 flags
+-- marked `failed`. A response with no flags table keeps the cached flags. A
+-- non-empty `quotaLimited` array wipes all cached flags.
 
 local FlagCache = {}
 
@@ -38,7 +41,7 @@ local function resolveV4Value(flag: any): boolean | string
     return flag.enabled == true
 end
 
--- Merges a decoded /flags response into the store (in place).
+-- Applies a decoded /flags response to the store (in place).
 function FlagCache.applyResponse(store, response)
     if type(response) ~= "table" then
         return
@@ -53,6 +56,16 @@ function FlagCache.applyResponse(store, response)
         table.clear(store.payloads)
         table.clear(store.details)
         return
+    end
+
+    local partial = response.errorsWhileComputingFlags == true
+    if
+        not partial
+        and (type(response.flags) == "table" or type(response.featureFlags) == "table")
+    then
+        table.clear(store.values)
+        table.clear(store.payloads)
+        table.clear(store.details)
     end
 
     -- v3 format.
@@ -70,7 +83,7 @@ function FlagCache.applyResponse(store, response)
     -- v4 format overrides v3 for matching keys.
     if type(response.flags) == "table" then
         for key, flag in response.flags do
-            if type(flag) == "table" then
+            if type(flag) == "table" and not (partial and flag.failed == true) then
                 store.values[key] = resolveV4Value(flag)
 
                 local metadata = flag.metadata
