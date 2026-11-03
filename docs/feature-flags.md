@@ -74,8 +74,8 @@ guild, changed a setting), or on a timer if you roll flags out gradually and wan
 pick up changes.
 
 After an error-free reload, the cache holds exactly the flags PostHog returned, so a flag you disable
-in PostHog falls back to your `default`. If PostHog reports errors while evaluating flags, any flag it
-couldn't evaluate keeps its last value.
+in PostHog falls back to your `default`. If PostHog reports errors while evaluating flags, any flag
+marked as failed or missing from the response keeps its last value.
 
 ## Targeting with properties
 
