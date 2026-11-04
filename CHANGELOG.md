@@ -1,5 +1,11 @@
 # posthog-roblox
 
+## 0.2.1 — 2026-11-04
+
+### Patch changes
+
+- [64afc29](https://github.com/posthog/posthog-roblox/commit/64afc2962f7b7d47242803b40d8fa4c95d70450a) Clear cached feature flags that are missing from an error-free `/flags` response, so a flag disabled in PostHog falls back to the default after `ReloadFeatureFlags` instead of keeping its last value. Responses with `errorsWhileComputingFlags` are still merged: flags marked as failed or missing from the response keep their previous value. — Thanks @LucasAIBuilder for your first contribution 🎉!
+
 ## 0.2.0 — 2026-10-15
 
 ### Minor changes
