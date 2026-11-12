@@ -11,8 +11,9 @@
 --
 -- Resolution: v4 (`flags`) takes priority over v3 (`featureFlags`). An error-free
 -- response replaces all cached flags, so a flag missing from it reads as unset. A
--- response with `errorsWhileComputingFlags` is merged instead, skipping v4 flags
--- marked `failed`. A response with no flags table keeps the cached flags. A
+-- response with `errorsWhileComputingFlags` is merged instead. Failed detailed
+-- records never supply values or payloads, including via flat mirrors.
+-- A response with no flags table keeps the cached flags. A
 -- non-empty `quotaLimited` array wipes all cached flags.
 
 local FlagCache = {}
@@ -22,6 +23,8 @@ function FlagCache.empty()
         values = {},
         payloads = {},
         details = {},
+        failed = {},
+        errorsWhileComputingFlags = false,
         requestId = nil,
         evaluatedAt = nil,
     }
@@ -49,12 +52,14 @@ function FlagCache.applyResponse(store, response)
 
     store.requestId = response.requestId
     store.evaluatedAt = response.evaluatedAt
+    store.errorsWhileComputingFlags = response.errorsWhileComputingFlags == true
 
     -- Quota limited: clear everything, keep request metadata.
     if isNonEmptyArray(response.quotaLimited) then
         table.clear(store.values)
         table.clear(store.payloads)
         table.clear(store.details)
+        table.clear(store.failed)
         return
     end
 
@@ -66,29 +71,59 @@ function FlagCache.applyResponse(store, response)
         table.clear(store.values)
         table.clear(store.payloads)
         table.clear(store.details)
+        table.clear(store.failed)
     end
 
-    -- v3 format.
+    local failedKeys = {}
+    if type(response.flags) == "table" then
+        for key, flag in response.flags do
+            if type(flag) == "table" and flag.failed == true then
+                failedKeys[key] = true
+            end
+        end
+    end
+
+    -- v3 format, excluding mirrors of known failed detailed records.
     if type(response.featureFlags) == "table" then
         for key, value in response.featureFlags do
-            store.values[key] = value
+            if not failedKeys[key] then
+                store.values[key] = value
+                if store.failed[key] then
+                    store.failed[key] = nil
+                    store.details[key] = nil
+                end
+            end
         end
     end
     if type(response.featureFlagPayloads) == "table" then
         for key, payload in response.featureFlagPayloads do
-            store.payloads[key] = payload
+            if not failedKeys[key] then
+                store.payloads[key] = payload
+            end
         end
     end
 
     -- v4 format overrides v3 for matching keys.
     if type(response.flags) == "table" then
         for key, flag in response.flags do
-            if type(flag) == "table" and not (partial and flag.failed == true) then
-                store.values[key] = resolveV4Value(flag)
+            if type(flag) == "table" then
+                if flag.failed == true then
+                    if store.values[key] ~= nil then
+                        continue
+                    end
+                    store.failed[key] = true
+                    store.payloads[key] = nil
+                else
+                    if store.failed[key] then
+                        store.details[key] = nil
+                    end
+                    store.failed[key] = nil
+                    store.values[key] = resolveV4Value(flag)
+                end
 
                 local metadata = flag.metadata
                 if type(metadata) == "table" then
-                    if metadata.payload ~= nil then
+                    if flag.failed ~= true and metadata.payload ~= nil then
                         store.payloads[key] = metadata.payload
                     end
 

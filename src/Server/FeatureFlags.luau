@@ -137,12 +137,15 @@ function FeatureFlags:get(playerState, key: string)
 end
 
 -- Emits a deduplicated $feature_flag_called event for an accessed flag.
-function FeatureFlags:trackCalled(playerState, key: string, value: boolean | string)
-    if not self._config.sendFeatureFlagEvents then
+function FeatureFlags:trackCalled(playerState, key: string, value: (boolean | string)?)
+    local store = playerState.flagStore
+    local failed = store and store.failed[key] == true
+    if not self._config.sendFeatureFlagEvents or (value == nil and not failed) then
         return
     end
 
-    local dedupKey = `{playerState.distinctId}:{key}:{tostring(value)}`
+    local response = if value == nil then false else value
+    local dedupKey = `{playerState.distinctId}:{key}:{tostring(response)}`
     if playerState.flagCalled[dedupKey] then
         return
     end
@@ -150,10 +153,19 @@ function FeatureFlags:trackCalled(playerState, key: string, value: boolean | str
 
     local props = {
         ["$feature_flag"] = key,
-        ["$feature_flag_response"] = value,
+        ["$feature_flag_response"] = response,
     }
 
-    local store = playerState.flagStore
+    local errors = {}
+    if failed and value == nil then
+        table.insert(errors, "evaluation_failed")
+    end
+    if store and store.errorsWhileComputingFlags then
+        table.insert(errors, "errors_while_computing_flags")
+    end
+    if #errors > 0 then
+        props["$feature_flag_error"] = table.concat(errors, ",")
+    end
     if store then
         if store.requestId ~= nil then
             props["$feature_flag_request_id"] = store.requestId

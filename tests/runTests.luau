@@ -31,6 +31,7 @@ coverage.instrument("MemoryStorage", require("../src/Server/Storage/MemoryStorag
 require("./Uuid.spec")
 require("./RetryPolicy.spec")
 require("./FlagCache.spec")
+require("./FeatureFlags.spec")
 require("./ExceptionBuilder.spec")
 require("./EventQueue.spec")
 require("./BeforeSend.spec")
