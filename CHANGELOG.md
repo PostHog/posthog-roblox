@@ -1,5 +1,11 @@
 # posthog-roblox
 
+## 0.2.2 — 2026-11-13
+
+### Patch changes
+
+- [8350029](https://github.com/posthog/posthog-roblox/commit/8350029f98984916b722628f5e064be3f0bd947b) Exclude failed detailed feature flags and their flat mirrors from cached values and payloads. Honor caller defaults and report failed-read diagnostics, preserving successful cached values only on response-wide errored refreshes. — Thanks @marandaneto for your first contribution 🎉!
+
 ## 0.2.1 — 2026-11-04
 
 ### Patch changes
