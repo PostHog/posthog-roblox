@@ -168,4 +168,95 @@ do
     end)
 end
 
+for _, errorBit in { false, "absent", true } do
+    h.test(
+        `FlagCache: failed records and flat mirrors omitted with global errors {errorBit}`,
+        function()
+            local store = FlagCache.empty()
+            local response = {
+                flags = {
+                    checkout = {
+                        enabled = false,
+                        failed = true,
+                        metadata = { id = 42, payload = { copy = "failed" } },
+                    },
+                    variant = {
+                        enabled = true,
+                        variant = "failed-variant",
+                        failed = true,
+                        metadata = { payload = "failed-payload" },
+                    },
+                    disabled = { enabled = false, failed = false },
+                    healthy = { enabled = false },
+                },
+                featureFlags = { checkout = false, variant = "mirror" },
+                featureFlagPayloads = { checkout = "mirror", variant = "mirror" },
+                errorsWhileComputingFlags = if errorBit == "absent" then nil else errorBit,
+            }
+            FlagCache.applyResponse(store, response)
+            h.expectNil(FlagCache.getValue(store, "checkout"))
+            h.expectNil(FlagCache.getPayload(store, "checkout"))
+            h.expectNil(FlagCache.getValue(store, "variant"))
+            h.expectNil(FlagCache.getPayload(store, "variant"))
+            h.expectFalse(FlagCache.getValue(store, "disabled"))
+            h.expectFalse(FlagCache.getValue(store, "healthy"))
+        end
+    )
+
+    h.test(`FlagCache: failed refresh replaces unless response-wide errors {errorBit}`, function()
+        local store = FlagCache.empty()
+        FlagCache.applyResponse(store, {
+            featureFlags = { enabled = true, disabled = false, variant = "blue", deleted = true },
+            featureFlagPayloads = { enabled = "local", disabled = "local", variant = "local" },
+        })
+        FlagCache.applyResponse(store, {
+            flags = {
+                enabled = { enabled = false, failed = true },
+                disabled = { enabled = false, failed = true },
+                variant = { enabled = true, variant = "failed", failed = true },
+                healthy = { enabled = false },
+            },
+            featureFlags = { enabled = false, disabled = "failed", variant = "failed" },
+            featureFlagPayloads = { enabled = "failed", disabled = "failed", variant = "failed" },
+            errorsWhileComputingFlags = if errorBit == "absent" then nil else errorBit,
+        })
+        for key, value in { enabled = true, disabled = false, variant = "blue", deleted = true } do
+            h.expectEqual(FlagCache.getValue(store, key), if errorBit == true then value else nil)
+            if key ~= "deleted" then
+                h.expectEqual(
+                    FlagCache.getPayload(store, key),
+                    if errorBit == true then "local" else nil
+                )
+            end
+        end
+        h.expectFalse(FlagCache.getValue(store, "healthy"))
+    end)
+end
+
+h.test("FlagCache: recovery and quota clear per-flag failure diagnostics", function()
+    local store = FlagCache.empty()
+    local failure =
+        { flags = { checkout = { enabled = false, failed = true, metadata = { id = 1 } } } }
+    FlagCache.applyResponse(store, failure)
+    h.expectTrue(store.failed.checkout)
+    FlagCache.applyResponse(
+        store,
+        { featureFlags = { checkout = false }, errorsWhileComputingFlags = true }
+    )
+    h.expectFalse(FlagCache.getValue(store, "checkout"))
+    h.expectNil(store.failed.checkout)
+    h.expectNil(FlagCache.getDetails(store, "checkout"))
+    FlagCache.applyResponse(store, failure)
+    FlagCache.applyResponse(
+        store,
+        { flags = { checkout = { enabled = false } }, errorsWhileComputingFlags = true }
+    )
+    h.expectFalse(FlagCache.getValue(store, "checkout"))
+    h.expectNil(store.failed.checkout)
+    h.expectNil(FlagCache.getDetails(store, "checkout"))
+    FlagCache.applyResponse(store, failure)
+    FlagCache.applyResponse(store, { quotaLimited = { "feature_flags" } })
+    h.expectNil(store.failed.checkout)
+end)
+
 return true

@@ -527,9 +527,7 @@ function PostHog:GetFeatureFlag(subject: Types.Subject?, key: string): Types.Fea
     local result = S.featureFlags:get(state, key)
 
     local value = S.featureFlags:getValue(state, key)
-    if value ~= nil then
-        S.featureFlags:trackCalled(state, key, value)
-    end
+    S.featureFlags:trackCalled(state, key, value)
     return result
 end
 
@@ -539,10 +537,10 @@ function PostHog:IsFeatureEnabled(subject: Types.Subject?, key: string, default:
     end
     local state = resolveSubject(subject)
     local value = S.featureFlags:getValue(state, key)
+    S.featureFlags:trackCalled(state, key, value)
     if value == nil then
         return default == true
     end
-    S.featureFlags:trackCalled(state, key, value)
     return FlagCache.isEnabled(value)
 end
 
